@@ -9,6 +9,7 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
             chtml: { scale: 0.96 } };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script src="live.js"></script>
 <style>
   :root{
     --bg:#0b0e14; --panel:#12161f; --panel2:#1a2030; --line:#242b3d;
@@ -179,9 +180,17 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
   &mdash; each replaced by a measured mechanism</span></div>
 </div>
 
+<div id="live-strip" class="card" style="padding:10px 18px;display:flex;gap:16px;
+     flex-wrap:wrap;align-items:center;font-size:12.5px">
+  <span class="mono mut">LIVE</span>
+  <span id="live-runs" style="display:flex;gap:14px;flex-wrap:wrap"></span>
+  <span id="live-stamp" class="mut mono" style="margin-left:auto"></span>
+</div>
+
 <div class="tabs">
   <button class="tab active" data-page="page-log">Research log</button>
   <button class="tab" data-page="page-findings">Findings</button>
+  <button class="tab" data-page="page-promising">Most promising</button>
   <button class="tab" data-page="page-roadmap">Roadmap</button>
 </div>
 
@@ -750,6 +759,106 @@ init-sensitivity footnote. This must be tried <i>before</i> claiming novelty.</l
 
 </div><!-- /page-findings -->
 
+<!-- ============================================================ PROMISING PAGE -->
+<div id="page-promising" hidden>
+
+<div class="card" style="border-left:3px solid var(--gold)">
+<h2>Most promising, ranked</h2>
+<p>Ranked by evidence quality &times; generality &times; testability — not by how much we like
+them. Ranking as of the n=10 statistics run; the LIVE strip above tracks it.</p>
+</div>
+
+<div class="fcard primary" id="p1">
+<h3>#1 &middot; The horizon-myopic decay attractor
+<span class="pill p-find">BEST EVIDENCE &middot; BIGGER THAN OUR METHOD</span></h3>
+<p style="font-size:15px"><b>Gradient training doesn't fail to learn long-horizon retention —
+it actively optimizes retention away, at a rate set by the training horizon.</b></p>
+<dl class="frow">
+<dt>The mechanism</dt><dd>The short-horizon training loss has an <i>interior minimum</i> in the
+decay rate at \(d^\* \approx 10^{-3} \approx \tfrac{0.05}{K_{\text{train}}}\): mild forgetting
+cuts interference over the visible horizon while its retention cost
+(\(e^{-d^\*K_{\text{train}}}\!\approx\!0.95\)) is absorbed by a learned gain. At deployment
+horizon that same optimum gives gain \(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) —
+catastrophic. Measured two independent ways: the landscape scan's train-loss minimum with a
+gradient zero-crossing at \(d^\*\), and the SNR probe's sign structure (SNR 8&ndash;11
+everywhere: Adam sees the parameter fine and <i>chooses</i> the attractor).</dd>
+<dt>Why #1</dt><dd>(i) <b>Evidence profile:</b> all 12 learned runs across three
+parameterizations converged onto the attractor; the claim survived three of our own refutation
+attempts (flat-basin — refuted and replaced; init0 — confirmed the removal frame; explicit
+regularization — fails at &minus;4.0&nbsp;&plusmn;&nbsp;2.5, losing the tug-of-war).
+(ii) <b>Bigger than our architecture:</b> the finding is about the objective of <i>any</i>
+memory with a learnable forgetting rate trained short and deployed long — Mamba's &Delta;,
+IndexMem's &lambda;, gated RNNs. Pinning is merely one of two fixes.
+(iii) <b>Practical fix is one line:</b> freeze the decay (or project it out). Not a new
+architecture.</dd>
+<dt>The killer experiment</dt><dd class="gold"><b>The scaling law:</b> sweep
+\(K_{\text{train}}\) and test whether the learned \(d^\*\) tracks \(\sim 1/K_{\text{train}}\).
+If it does, this stops being a toy observation and becomes a law about memory training.
+Laptop-scale, a few hours, no cluster needed — the single highest-value experiment left.</dd>
+<dt>Risks</dt><dd>All evidence is one synthetic task family (L1 on real LM states is
+make-or-break); the genre "models optimize what training measures" is well-trodden — a targeted
+literature pass on train-short/test-long SSM decay behavior must precede any external claim.</dd>
+</dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-findings','f1')">Finding F1 (full detail)</a>
+<a class="xref" onclick="return goto('page-log','sec-interactive')">§4.5 drag the attractor</a>
+<a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt</a>
+</div>
+</div>
+
+<div class="fcard tool" id="p2">
+<h3>#2 &middot; The auditable balance-law memory
+<span class="pill p-part">OUR UNIQUE ASSET — NOT YET A WIN</span></h3>
+<dl class="frow">
+<dt>What it is</dt><dd>The only piece that is genuinely <i>ours</i>: a driven memory whose
+protected content obeys \(C^\top z_t = C^\top z_s + \sum_k C^\top g_k\) exactly
+(3.2&times;10&#8315;&sup1;&sup3;, no loss term). The ledger changes only by explicit, logged
+fluxes — an accounting property no attention window or learned-decay memory has. Its
+compatibility defect doubles as an online staleness alarm.</dd>
+<dt>Honest status</dt><dd>No demonstrated empirical advantage over the frozen-zero fix on
+current tasks (our benchmark never forced forgetting — F1 caveats). Its value proposition is
+exactness + auditability + selective protection <i>when forgetting is provably necessary</i>,
+which the next benchmark must instantiate. Long-term, this is the piece the physics-scratchpad
+branch (T3) builds on.</dd>
+</dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-findings','f4')">Finding F4</a>
+<a class="xref" onclick="return goto('page-log','sec-idea')">§1 balance law</a>
+<a class="xref file" href="latent_twin_memory.py" target="_blank">latent_twin_memory.py</a>
+</div>
+</div>
+
+<div class="fcard neg" id="p3">
+<h3>#3 &middot; The audit protocol <span class="pill p-fail">METHOD, NOT DISCOVERY —
+BUT THE CREDIBILITY BACKBONE</span></h3>
+<p>One-variable controls, oracle recalibration on held-out data, no-input floors, Bayes-floor
+comparison, live-parameter counts, timescale-collision checks. It killed our own best-looking
+result (the &epsilon; artifact), then caught a citation error in our own dashboard, and it
+transfers directly to published structured-memory evaluations — most of which report none of
+these controls. Everything else on this page is believable <i>because</i> of this item.</p>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-findings','f2')">Finding F2</a>
+<a class="xref" onclick="return goto('page-log','sec-failures')">§5 failure ledger</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (29/29)</a>
+</div>
+</div>
+
+<div class="card">
+<h3>Explicitly NOT promising right now</h3>
+<ul>
+<li><b>"Pinning beats alternatives"</b> — unsupported: frozen-zero decay matched it on the
+ledger and beat it on content, because our task never required forgetting. Needs the
+forgetting-necessary benchmark before it can be claimed.</li>
+<li><b>Anchor transport via the balance law</b> — falsified (encoder-borne, F3).</li>
+<li><b>The 12.7&ndash;29&times; headline</b> — retracted (&epsilon; artifact, §5).</li>
+</ul>
+<p class="mut">What would reshuffle this page: the n=10 stats (running), the
+\(d^\*\) vs \(1/K_{\text{train}}\) scaling result, and L1-count on real LM states.</p>
+</div>
+
+</div><!-- /page-promising -->
+
 <!-- ============================================================ ROADMAP PAGE -->
 <div id="page-roadmap" hidden>
 
@@ -938,7 +1047,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 function goto(page, anchor){
   document.querySelectorAll('.tab').forEach(x=>
     x.classList.toggle('active', x.dataset.page===page));
-  ['page-log','page-findings','page-roadmap'].forEach(id=>{
+  ['page-log','page-findings','page-promising','page-roadmap'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.hidden = id!==page;
   });
@@ -952,6 +1061,35 @@ function goto(page, anchor){
   return false;
 }
 document.querySelectorAll('.tab').forEach(b=>{ b.onclick=()=>goto(b.dataset.page); });
+
+/* ============ LIVE strip: renders window.LIVE, re-injects live.js ========= */
+function renderLive(){
+  const L=window.LIVE;
+  const strip=document.getElementById('live-strip');
+  if(!L||!strip) return;
+  const dot=s=>s==='done'?'var(--green)':s==='running'?'var(--blue)':'var(--mut)';
+  document.getElementById('live-runs').innerHTML=L.runs.map(r=>
+    '<span><span class="sw" style="background:'+dot(r.state)+
+    (r.state==='running'?';box-shadow:0 0 7px var(--blue)':'')+'"></span>'+
+    r.name+(r.note?' <span class="mut">('+r.note+')</span>':'')+'</span>').join('');
+  const st=L.stats;
+  let extra='';
+  if(st&&st.summary){
+    extra=' · n=10 COMPLETE: '+st.summary.map(x=>x.arm+' '+x.skill_med).join(', ');
+  } else if(st&&st.last_rows&&st.last_rows.length){
+    extra=' · latest: '+st.last_rows[st.last_rows.length-1];
+  }
+  document.getElementById('live-stamp').textContent=
+    'data as of '+L.generated+extra;
+}
+renderLive();
+setInterval(()=>{                       // re-inject live.js (cache-busted)
+  const s=document.createElement('script');
+  s.src='live.js?bust='+Date.now();
+  s.onload=()=>s.remove();
+  s.onerror=()=>s.remove();
+  document.body.appendChild(s);         // live.js calls renderLive() itself
+},30000);
 </script>
 
 <script>
