@@ -490,9 +490,12 @@ arrays as the sliders above — inline SVG, no chart library, view-source friend
 <div class="grid2">
 <figure class="fig" id="fig1">
   <div class="fig-plot"></div>
-  <figcaption><b>Fig. 1 — The n=10 verdict.</b> <span id="fig1-cap">Per-seed ledger skill at
-  16&times; the training horizon, 10 seeds per arm. <span class="mut">(populates when the
-  statistics run completes — see LIVE strip)</span></span></figcaption>
+  <figcaption><b>Fig. 1 — The n=10 verdict.</b> <span id="fig1-cap">Per-seed ledger skill at 16&times; the
+  training horizon, 10 seeds per arm. Learned decay at standard init fails every seed
+  (medians &minus;6.3 / &minus;5.7); soft K+S hovers near zero with failure seeds; the removal
+  fixes and pinned sit at +1.0. Pinned beats every learned baseline <b>10/10 seeds
+  (sign-test p = 0.002)</b> and is statistically indistinguishable from the removal fixes
+  (p &ge; 0.34, with exact ties at +1.000) — but is the only arm whose IQR is degenerate at [+1.000, +1.000].</span></figcaption>
 </figure>
 <figure class="fig" id="fig2">
   <div class="fig-plot"></div>
@@ -661,6 +664,10 @@ exact zero decay and the best, most stable content (0.62&plusmn;0.10). Every lea
 at 6.7&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
 sub-critical region \(dK_{\text{train}}\!<\!0.1\), \(L_{\text{train}}\) varies 6,365&times; less
 than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-critical.
+<b>n=10 statistics (final, pre-registered):</b> pinned beats every learned baseline
+<b>10/10 seeds</b> (exact sign-test p = 0.00195; median skill differences +7.29 / +6.70 /
++0.78); the removal fixes tie it (median diff +0.000&ndash;0.002, several exact ties at +1.000; sign-test p &ge; 0.34 — indistinguishable); pinned is
+the only arm whose IQR is degenerate at [+1.000,&nbsp;+1.000] — see Fig.&nbsp;1.
 <span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 8&ndash;11 at all
 decay values, gradient sign flips around \(d^\*\approx 7\times10^{-4}\), confirming an interior
 attractor of the training objective, which is where all 12 learned runs converged.
@@ -694,7 +701,7 @@ designed so never-forgetting would fail on content via interference — it doesn
 decay has the <i>best</i> content). So this task cannot distinguish "protect selectively" from
 "never decay anything", and pinned's selective-forgetting advantage is <b>unsupported by current
 data</b> — a task where forgetting is provably necessary is now T1 priority #1. Also: synthetic
-accumulation family only; n=3 (n=10 running); one scale (\(n_z{=}8\)); the constraint helps only
+accumulation family only (n=10 statistics complete); one scale (\(n_z{=}8\)); the constraint helps only
 quantities you can name and supervise a flux for. Pinned's remaining unique value: machine-exact
 conservation, the auditable balance law, and guarantees no init trick provides.</dd>
 </dl>
@@ -916,7 +923,7 @@ forgetting-necessary benchmark before it can be claimed.</li>
 <li><b>Anchor transport via the balance law</b> — falsified (encoder-borne, F3).</li>
 <li><b>The 12.7&ndash;29&times; headline</b> — retracted (&epsilon; artifact, §5).</li>
 </ul>
-<p class="mut">What would reshuffle this page: the n=10 stats (running), the
+<p class="mut">What would reshuffle this page: the
 \(d^\*\) vs \(1/K_{\text{train}}\) scaling result, and L1-count on real LM states.</p>
 </div>
 
@@ -1182,8 +1189,8 @@ window.RDATA = {
   RESCUE:[["diag baseline",-6.000,14.716],["diag +regularizer",-3.991,25.749],
           ["diag 3x training",-1.086,11.282],["diag init0 (frozen)",0.992,0.479],
           ["scalar init0 (frozen)",1.000,0.266],["pinned CᵀW=0",1.000,0.685]],
-  /* n=10 stats: filled in when the run completes */
-  STATS:null,
+  /* n=10 stats, results/L0_stats.txt (final) */
+  STATS:{"arms": [{"name": "scalar", "skills": [-6.651, -6.718, -6.241, -6.583, -6.403, -5.933, -6.036, -3.842, -6.105, -6.346]}, {"name": "diag", "skills": [-5.981, -6.018, -6.373, -5.228, -5.422, -4.636, -5.366, -3.591, -6.362, -6.322]}, {"name": "ks", "skills": [0.486, 0.186, 0.081, -0.507, 0.628, -0.14, 0.666, -0.257, 0.259, 0.369]}, {"name": "diag0", "skills": [0.999, 0.986, 1.0, 0.969, 1.0, 1.0, 0.938, 0.996, 0.994, 1.0]}, {"name": "scalar0", "skills": [1.0, 0.999, 0.989, 1.0, 1.0, 0.999, 0.986, 1.0, 0.978, 1.0]}, {"name": "pinned", "skills": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.999, 1.0, 0.999]}]},
 };
 
 /* ============ hands-on sliders: actual logged data, nothing simulated ======= */

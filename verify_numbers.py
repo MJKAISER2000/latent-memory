@@ -133,6 +133,52 @@ def main():
             check(f"L0.5 interior sparse error {name}", float(m.group(g)), cited,
                   0.01, "L05_anchor.txt")
 
+    # --- n=10 statistics claims ---
+    st = (R / "L0_stats.txt").read_text(encoding="utf-8", errors="replace")
+    srows = re.findall(r"s(\d)\s+(\w+): skill=([+-][\d.]+)", st)
+    byarm = {}
+    for s, m, sk in srows:
+        byarm.setdefault(m, []).append(float(sk))
+    OUT.append(("n=10: every arm has exactly 10 seeds", "L0_stats.txt",
+                ",".join(f"{m}:{len(v)}" for m, v in sorted(byarm.items())), "10 x6",
+                "OK" if all(len(v) == 10 for v in byarm.values()) else "**MISMATCH**"))
+
+    def med(v):
+        v = sorted(v)
+        return (v[4] + v[5]) / 2
+
+    for arm, cited in [("scalar", -6.293), ("diag", -5.702), ("ks", 0.223),
+                       ("diag0", 0.998), ("scalar0", 1.000), ("pinned", 1.000)]:
+        check(f"n=10 median skill {arm}", med(byarm[arm]), cited, 0.01, "L0_stats.txt")
+
+    for base, mdiff in [("scalar", 7.293), ("diag", 6.701), ("ks", 0.777)]:
+        wins = sum(p > b for p, b in zip(byarm["pinned"], byarm[base]))
+        OUT.append((f"pinned vs {base}: 10/10 paired wins", "L0_stats.txt",
+                    f"{wins}/10", "10/10",
+                    "OK" if wins == 10 else "**MISMATCH**"))
+        diffs = sorted(p - b for p, b in zip(byarm["pinned"], byarm[base]))
+        check(f"pinned vs {base} median diff", (diffs[4] + diffs[5]) / 2, mdiff,
+              0.01, "L0_stats.txt")
+    # sign test p for 10/10, two-sided: 2 * (1/2)^10
+    OUT.append(("sign-test p for 10/10", "arithmetic", f"{2 * 0.5**10:.6f}",
+                "0.001953", "OK" if abs(2 * 0.5**10 - 0.001953) < 1e-6 else "**MISMATCH**"))
+    # fix parity -- tie-aware: at log precision several seeds tie at +1.000, so
+    # the verifiable claim is "no significant difference", i.e. neither side has
+    # >= 9/10 decided wins (two-sided sign-test significance threshold at n=10).
+    for fix in ["diag0", "scalar0"]:
+        wins = sum(p > b for p, b in zip(byarm["pinned"], byarm[fix]))
+        losses = sum(p < b for p, b in zip(byarm["pinned"], byarm[fix]))
+        ok = wins <= 8 and losses <= 8
+        OUT.append((f"pinned vs {fix}: parity (no significant difference)",
+                    "L0_stats.txt", f"{wins}W/{losses}L/{10-wins-losses}T",
+                    "neither side >=9", "OK" if ok else "**MISMATCH**"))
+    # degenerate IQR for pinned
+    pv = sorted(byarm["pinned"])
+    iqr_ok = abs(pv[2] - 1) < 5e-4 and abs(pv[7] - 1) < 5e-4
+    OUT.append(("pinned IQR degenerate at [1.000,1.000]", "L0_stats.txt",
+                f"[{pv[2]:.3f},{pv[7]:.3f}]", "[1.000,1.000]",
+                "OK" if iqr_ok else "**MISMATCH**"))
+
     # --- write report ---
     lines = ["# Verification report", "",
              "Every quantitative claim in the package, recomputed from raw logs "

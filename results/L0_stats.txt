@@ -59,3 +59,27 @@ n=10 stats run | arms=['scalar', 'diag', 'ks', 'diag0', 'scalar0', 'pinned']
   s9      ks: skill=+0.369 late=0.639 dmin=7.50e-04
   s9   diag0: skill=+1.000 late=0.283 dmin=2.06e-09
   s9 scalar0: skill=+1.000 late=0.300 dmin=2.11e-09
+  s9  pinned: skill=+0.999 late=0.840 dmin=-1.03e-07
+
+==============================================================================
+MEDIAN [IQR] over 10 seeds
+==============================================================================
+     arm |       ledger skill @1024 |           content late
+------------------------------------------------------------------------------
+  scalar |   -6.293 [-6.538,-6.054] |    5.522 [1.298,12.333]
+    diag |   -5.702 [-6.246,-5.263] |    5.452 [1.446,9.644]
+      ks |   +0.223 [-0.085,+0.456] |    1.108 [0.622,2.731]
+   diag0 |   +0.998 [+0.988,+1.000] |    0.540 [0.353,0.698]
+ scalar0 |   +1.000 [+0.991,+1.000] |    0.332 [0.277,0.533]
+  pinned |   +1.000 [+1.000,+1.000] |    0.758 [0.521,0.967]
+------------------------------------------------------------------------------
+
+PAIRED TESTS (pre-registered)
+  pinned vs  scalar (superiority): wins 10/10, sign-test p=0.001953, median diff=+7.293
+  pinned vs    diag (superiority): wins 10/10, sign-test p=0.001953, median diff=+6.701
+  pinned vs      ks (superiority): wins 10/10, sign-test p=0.001953, median diff=+0.777
+  pinned vs   diag0 ( fix-parity): wins 7/10, sign-test p=0.3438, median diff=+0.002, wilcoxon p=0.06445
+  pinned vs scalar0 ( fix-parity): wins 7/10, sign-test p=0.3438, median diff=+0.000, wilcoxon p=0.1309
+  scalar0 vs  scalar (  init0-fix): wins 10/10, sign-test p=0.001953, median diff=+7.287
+
+(fix-parity: a LOW win count / high p means the two fixes are statistically indistinguishable on raw skill -- which is the expected result; pinned's edge is exactness+auditability, not skill)

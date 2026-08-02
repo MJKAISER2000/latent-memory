@@ -12,7 +12,8 @@ latent-memory comparison), findings with per-claim provenance links, a ranked
 "most promising" page, and the roadmap. Every quantitative claim is recomputed from raw
 logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (29/29).
 
-Headline (toy-scale, honestly scoped): the short-horizon training objective has an
+Headline (toy-scale, honestly scoped; n=10, pre-registered superiority tests all
+p = 0.002): the short-horizon training objective has an
 **interior optimum** for the decay rate — invisible over the training horizon
 (`e^{−d*·64} ≈ 0.95`), catastrophic at 16× it (`≈ 0.45`). Soft fixes lose to the attractor;
 removal fixes (a frozen parameter, or the `CᵀW = 0` projection below) restore full skill.
