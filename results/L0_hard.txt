@@ -1,0 +1,5 @@
+L0-HARD  (per-sample deposit rate; constant predictor ~0.47 rel err @ t=1024)
+seeds=[0, 1, 2]  modes=['dissipative', 'conservative', 'pinned']
+
+  seed=0   dissipative  r=0.888/c=+0.99  r=0.042/c=+1.00  r=0.069/c=+1.00  r=0.174/c=+1.00  r=0.340/c=+1.00  (215s)
+  seed=0  conservative  r=0.740/c=+0.99  r=0.041/c=+1.00  r=0.031/c=+1.00  r=0.031/c=+1.00  r=0.051/c=+1.00  (247s)

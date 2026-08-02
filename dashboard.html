@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latent Twin Memory — Research Dashboard</title>
+<script>
+MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
+            chtml: { scale: 0.96 } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#30363d;
+    --tx:#e6edf3; --mut:#8b949e; --gold:#e3b341; --green:#3fb950;
+    --red:#f85149; --blue:#58a6ff; --purple:#bc8cff; --amber:#d29922;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+       font:15px/1.6 "Segoe UI",system-ui,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px}
+  h1{font-size:26px;margin:0 0 4px} h2{font-size:20px;margin:0 0 12px}
+  h3{font-size:16px;margin:0 0 8px}
+  .sub{color:var(--mut);margin-bottom:26px}
+  .card{background:var(--panel);border:1px solid var(--line);
+        border-radius:10px;padding:20px 22px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+        padding:2px 10px;border-radius:20px;vertical-align:2px;margin-left:8px}
+  .p-find{background:#12351c;color:var(--green);border:1px solid #1f6f35}
+  .p-fail{background:#3d1418;color:var(--red);border:1px solid #792e34}
+  .p-part{background:#3a2b12;color:var(--amber);border:1px solid #7a5a1e}
+  .p-run{background:#12283d;color:var(--blue);border:1px solid #1f4e79}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:6px 10px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{background:var(--panel2);color:var(--mut);font-weight:600}
+  td.hi{color:var(--green);font-weight:700}
+  td.bad{color:var(--red)} td.gold{color:var(--gold);font-weight:700}
+  .mut{color:var(--mut)} .gold{color:var(--gold)} .green{color:var(--green)}
+  .red{color:var(--red)} .blue{color:var(--blue)}
+  code,.mono{font-family:Consolas,monospace;font-size:13px}
+  code{background:var(--panel2);padding:1px 6px;border-radius:5px}
+  .math-block{background:var(--panel2);border:1px solid var(--line);
+              border-radius:8px;padding:10px 16px;margin:12px 0;overflow-x:auto}
+  .timeline{border-left:2px solid var(--line);margin-left:8px;padding-left:22px}
+  .tl-item{position:relative;margin-bottom:20px}
+  .tl-item::before{content:"";position:absolute;left:-29px;top:6px;width:12px;
+     height:12px;border-radius:50%;background:var(--mut)}
+  .tl-item.find::before{background:var(--green)}
+  .tl-item.fail::before{background:var(--red)}
+  .tl-item.part::before{background:var(--amber)}
+  .tl-item.run::before{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+  .anim-wrap{background:#0a0e14;border:1px solid var(--line);border-radius:10px;
+             padding:14px}
+  canvas{width:100%;height:auto;display:block;border-radius:6px}
+  .anim-head{display:flex;justify-content:space-between;align-items:baseline;
+             margin-bottom:6px}
+  .btn{background:var(--panel2);color:var(--tx);border:1px solid var(--line);
+       border-radius:6px;padding:4px 14px;cursor:pointer;font-size:13px}
+  .btn:hover{border-color:var(--blue)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);
+          margin-top:8px}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;
+      margin-right:5px;vertical-align:-1px}
+  .note{border-left:3px solid var(--amber);background:var(--panel2);
+        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .verdict{border-left:3px solid var(--red);background:#1d1114;
+        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .ok{border-left:3px solid var(--green);background:#0f1a13;
+        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Physics-Conforming Latent Twins &rarr; LLM Context Memory</h1>
+<div class="sub">Research dashboard &middot; August 2026 &middot; based on Chung, Bu &amp; Verma,
+<i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; RTX 3060 Laptop 6&nbsp;GB</div>
+
+<!-- ============================================================ IDEA -->
+<div class="card">
+<h2>1 &middot; The idea</h2>
+<p>The paper learns a surrogate solution operator for a physical system as
+<span class="blue">encode &rarr; evolve in latent space &rarr; decode</span>, with the latent
+generator <b>constrained so that selected physical quantities are conserved or dissipated by
+construction</b>:</p>
+<div class="math-block">$$\Psi(t,s,u_s) = d\big(m_{s\to t}(e(u_s))\big),\qquad
+m_{s\to t}(z)=e^{(t-s)W}z$$</div>
+<p>Our transplant: treat <b>LLM context</b> as the driven physical system. State = a small latent
+memory \(z\in\mathbb R^{n_z}\); time = block index; and the generator is built so a
+<b>designated subspace is exactly conserved</b> while everything orthogonal decays monotonically:</p>
+<div class="math-block">
+$$P = I - CC^{\top},\qquad
+K = P\,(A-A^{\top})\,P,\qquad
+S = -(PB)(PB)^{\top}-\varepsilon P$$
+$$W = K+S \;\;\Longrightarrow\;\; \underbrace{C^{\top}W = 0}_{\text{protected subspace}}
+\quad\text{and}\quad \underbrace{W+W^{\top}\preceq 0}_{\text{everything else decays}}$$
+</div>
+<p>The paper's flow is autonomous; context memory is <b>driven</b> by incoming token blocks
+\(g_k = \mathrm{Enc}(x_k)\). Under forcing, exact conservation upgrades to an exact
+<b>balance law</b> — the ledger changes only by what came in the door:</p>
+<div class="math-block">$$z_{k+1}=e^{\Delta t\,W}z_k+g_k
+\;\;\Longrightarrow\;\;
+C^{\top}z_t \;=\; C^{\top}z_s+\sum_{k=s}^{t-1}C^{\top}g_k
+\qquad\textit{(verified to } 3.2\times10^{-13}\textit{, no loss term)}$$</div>
+<p class="mut">Conservation is then <i>free</i>; the entire learning problem is making the flux
+\(C^{\top}g_k\) mean the right thing — the input-side analogue of the paper's pullback-matching
+loss (their Eq.&nbsp;7), whose Fig.&nbsp;10 shows conservation without anchoring is conservation
+of nothing.</p>
+</div>
+
+<!-- ============================================================ ANIMATION -->
+<div class="card">
+<h2>2 &middot; Traditional context vs. structured latent memory</h2>
+<p class="mut" style="margin-top:-6px">A fact (<span class="gold">&#9632; gold</span>) arrives early
+in a long stream. Left: a sliding attention window — the fact eventually falls out and is gone.
+Right: every block is encoded as a flux \(g_k\) into a small latent; the
+<span class="gold">pinned component</span> \(C^\top z\) integrates fluxes <i>exactly</i>
+(balance law) while the <span class="blue">free components</span> decay under \(e^{tW}\).
+This animates the verified <i>mechanism</i> — see §4 for what it does and doesn't buy empirically.</p>
+
+<div class="anim-wrap">
+  <div class="anim-head">
+    <span class="mono mut" id="animclock">t = 0</span>
+    <button class="btn" id="animbtn">Pause</button>
+  </div>
+  <canvas id="anim" width="1120" height="430"></canvas>
+  <div class="legend">
+    <span><span class="sw" style="background:#e3b341"></span>the fact / pinned ledger \(C^\top z\)</span>
+    <span><span class="sw" style="background:#58a6ff"></span>ordinary tokens / free latent components</span>
+    <span><span class="sw" style="background:#f85149"></span>evicted &mdash; unrecoverable</span>
+    <span><span class="sw" style="background:#3fb950"></span>query readout</span>
+  </div>
+</div>
+</div>
+
+<!-- ============================================================ TIMELINE -->
+<div class="card">
+<h2>3 &middot; Experiment timeline &mdash; findings <i>and</i> failures</h2>
+<div class="timeline">
+
+<div class="tl-item find">
+  <h3>Structural self-test <span class="pill p-find">VERIFIED</span></h3>
+  All guarantees hold at machine precision (float64): \(\max|C^\top W| = 5\times10^{-16}\),
+  \(\lambda_{\max}(W{+}W^\top)\le 0\), ledger drift \(2\times10^{-11}\) at \(t{=}10^4\),
+  driven balance law exact to \(3.2\times10^{-13}\) over 128 forced steps.
+  <span class="mut">The machinery does exactly what it claims. This part never wavered.</span>
+</div>
+
+<div class="tl-item fail">
+  <h3>L0 &mdash; synthetic ledger <span class="pill p-fail">ARTIFACT</span></h3>
+  Train a running-total task at \(K{=}64\), test at \(K{=}1024\). Headline looked spectacular:
+  pinned 12.7&times; better than the scalar-decay baseline at 16&times; extrapolation, error
+  <i>falling</i> as \(1/\sqrt t\). <b>It did not survive its own audit</b> — see the failure ledger.
+  What genuinely survives: pinned lands \(\sim\)1.55&times; off the information-theoretic floor and
+  tracks the sample-specific total with \(r=0.987\). A real working accumulator — just not
+  evidence of superiority.
+</div>
+
+<div class="tl-item fail">
+  <h3>L0.5 &mdash; anchor transport <span class="pill p-fail">FALSIFIED</span></h3>
+  Hypothesis: supervising the ledger at <i>one</i> horizon (\(t{=}64\)) should give the pinned
+  model every other horizon free, via the balance law. Result: sparse&nbsp;&asymp;&nbsp;dense for
+  <b>every</b> mode (transport ratio &asymp; 1.0 across 18 configs). The transport comes from the
+  <b>shared per-block encoder</b>, not from conservation.
+  <span class="mut">Killed one of our two claimed novelties. Cheap to learn, good to know.</span>
+</div>
+
+<div class="tl-item part">
+  <h3>Degeneracy self-check <span class="pill p-part">METHOD FIX</span></h3>
+  With a fixed deposit rate, \(M_t\) concentrates:
+  \(\mathrm{SD}[M_t]/\mathbb E[M_t] = \sqrt{\mathrm{Var}[a]/t}\,/\,\mathbb E[a]\to 0\), so a
+  <b>no-input constant predictor scores 7% at \(t{=}1024\)</b> — better than two of our three
+  baselines. Fixed with per-sample rate jitter (spread pinned at &sim;40% at every horizon,
+  constant predictor degraded to 47%). Also added the correlation/skill diagnostics that MSE can't
+  provide.
+</div>
+
+<div class="tl-item find">
+  <h3>Adversarial audit (4 independent lenses) <span class="pill p-find">DECISIVE NEGATIVE</span></h3>
+  One-variable control: set \(\varepsilon{=}0\) in the dissipative baseline. Its error at
+  \(t{=}1024\): 0.339&nbsp;&rarr;&nbsp;0.055. After a single scale+offset:
+  <b>0.0111 vs pinned's 0.0112, identical correlation. Advantage&nbsp;=&nbsp;1.00&times;.</b>
+  The entire L0 gap was our own hard-coded leak — see §5.
+  <span class="mut">This is the most valuable result so far: a real, mechanistic, reproducible
+  explanation of a seductive false positive.</span>
+</div>
+
+<div class="tl-item run">
+  <h3>L0-Frontier &mdash; the corrected experiment <span class="pill p-run" id="frontier-pill">RUNNING</span></h3>
+  The question that survives: under <b>capacity pressure</b> (\(n_z{=}8\), content reconstruction
+  forces forgetting; ledger retention forbids it on one direction), does <i>learned</i> decay
+  discover selective protection on its own, or does the architectural constraint matter for
+  <b>optimization reliability</b>? All audit fixes applied: learned decay everywhere (no floors),
+  matched parameterizations incl. unpinned \(K{+}S\), identical affine readouts, gated deposits
+  \(a_k = \text{flag}_k\cdot\text{amount}_k\) so the label is no mode's built-in invariant.
+  <span id="frontier-inline" class="mut">Results will replace this line.</span>
+</div>
+
+</div>
+</div>
+
+<!-- ============================================================ RESULTS -->
+<div class="card">
+<h2>4 &middot; Results (real numbers, artifacts labeled)</h2>
+
+<h3>L0 original &mdash; relative ledger error, 3-seed mean (trained to t=64)</h3>
+<table>
+<tr><th>mode</th><th>t=64</th><th>t=256</th><th>t=512</th><th>t=1024</th><th>verdict</th></tr>
+<tr><td>dissipative (fixed &epsilon;=10<sup>-3</sup>)</td><td>0.072</td><td>0.084</td>
+    <td>0.181</td><td class="bad">0.345</td><td class="bad">forced leak — artifact</td></tr>
+<tr><td>conservative (pure rotation)</td><td>0.075</td><td>0.051</td><td>0.148</td>
+    <td class="bad">0.468 &plusmn; 0.334</td><td class="bad">init-dependent lottery</td></tr>
+<tr><td>pinned</td><td>0.073</td><td>0.041</td><td>0.032</td><td>0.027</td>
+    <td class="mut">real accumulator, unfair race</td></tr>
+<tr><td class="mut">no-input constant predictor</td><td class="mut">0.280</td>
+    <td class="mut">0.140</td><td class="mut">0.099</td><td class="mut">0.070</td>
+    <td class="mut">beats 2 of 3 modes(!)</td></tr>
+</table>
+
+<h3>The audit's one-variable control (seed 0, t=1024)</h3>
+<table>
+<tr><th>model</th><th>rel. error</th><th>after oracle scale+offset</th><th>corr(pred, M)</th></tr>
+<tr><td>dissipative, &epsilon;=10<sup>-3</sup> (as published above)</td>
+    <td class="bad">0.3390</td><td>&mdash;</td><td>0.9878</td></tr>
+<tr><td>dissipative, &epsilon;=0 <b>(only change)</b></td><td>0.0553</td>
+    <td class="hi">0.0111</td><td>0.9878</td></tr>
+<tr><td>pinned</td><td>0.0112</td><td>0.0112</td><td>0.9878</td></tr>
+</table>
+<p class="mut">Identical correlation everywhere: no information was ever lost. The gap was a
+deterministic scalar gain \(e^{-\varepsilon t}\) that the pinned mode was exempted from by
+construction.</p>
+
+<h3>L0.5 anchor transport &mdash; absolute error, sparse (1 supervised horizon) vs dense (all)</h3>
+<table>
+<tr><th>mode</th><th>t=8</th><th>t=32</th><th>t=64 (anchor)</th><th>t=256</th><th>t=1024</th></tr>
+<tr><td>pinned &middot; dense</td><td>0.068</td><td>0.142</td><td>0.188</td><td>0.445</td><td>0.866</td></tr>
+<tr><td>pinned &middot; sparse</td><td>0.064</td><td>0.147</td><td>0.186</td><td>0.444</td><td>0.987</td></tr>
+<tr><td>dissipative &middot; dense</td><td>0.069</td><td>0.152</td><td>0.191</td><td>1.281</td><td>25.9</td></tr>
+<tr><td>dissipative &middot; sparse</td><td>0.127</td><td>0.151</td><td>0.181</td><td>1.102</td><td>25.2</td></tr>
+</table>
+<p class="mut">Sparse &asymp; dense <i>within every mode</i> (seed 0 shown; same pattern all seeds)
+&rArr; single-anchor transport is a property of the shared encoder, not of conservation.
+The pinned-vs-dissipative gap in this table is the &epsilon; artifact again.</p>
+
+<h3 id="frontier-h3">L0-Frontier <span class="pill p-run" id="frontier-pill2">RUNNING</span></h3>
+<div id="frontier-results"><p class="mut">Corrected experiment in progress &mdash; learned decay
+everywhere, matched params, capacity pressure. This section updates when it lands.</p></div>
+</div>
+
+<!-- ============================================================ FAILURE LEDGER -->
+<div class="card">
+<h2>5 &middot; Failure ledger &mdash; the &epsilon; artifact, in full</h2>
+<p>The original code applied the decay floor <b>asymmetrically</b>:</p>
+<div class="math-block">
+$$W_{\text{dissip}} = -BB^{\top}-\varepsilon I
+\qquad\text{vs}\qquad
+W_{\text{pinned}} = P(A{-}A^{\top})P-(PB)(PB)^{\top}-\varepsilon P$$
+</div>
+<p>The \(\varepsilon I\) term forces <i>every</i> direction of the baseline to leak at rate
+\(\varepsilon\); the \(\varepsilon P\) term exempts the protected direction. With
+\(\varepsilon = 10^{-3}\) and \(K_{\text{test}} = 1024\):</p>
+<div class="math-block">
+$$\varepsilon\,K_{\text{test}} = 1.024 \approx 1
+\;\;\Longrightarrow\;\;
+\text{readout gain} = e^{-\varepsilon t}\Big|_{t=1024} \approx 0.36$$
+</div>
+<p>The forced leak timescale <b>equalled the test horizon</b> — the baseline was scripted to fail
+at exactly the horizon we measured. The auditor reproduced the entire dissipative error curve with
+zero free parameters as quadrature of (per-block estimation noise) and (\(\varepsilon\)-leak bias),
+and the pinned/dissipative ratio tracks \(\varepsilon t\), not extrapolation depth:
+1.0&times; at \(\varepsilon t{=}0.06\) &rarr; 12.8&times; as \(\varepsilon t\) crosses 1.</p>
+
+<div class="verdict"><b>Also wrong, for the record:</b>
+(1) pinned had 2&times; the live generator parameters (both \(A\) and \(B\) alive; one of them dead
+in each baseline) despite a claimed "identical budget";
+(2) the readout had no gain/bias, so a deterministic, knowable miscalibration was scored as error;
+(3) the task label \(M_t=\sum a_k\) was literally the pinned mode's built-in invariant;
+(4) <code>init_spectral=0.03</code> put the conservative mode's rotation period (&sim;154 steps)
+between train and test horizons — its failure was invisible in training, maximal at test;
+(5) my "\(1/\sqrt t\) prediction confirmed to three digits" was a property of the metric, and the
+three-digit match was seed luck;
+(6) "Mamba/IndexMem corner" mislabeled the baseline — their decay is <i>learned</i> with no floor.
+</div>
+
+<div class="ok"><b>Why this failure is worth keeping:</b> it is a precise, reproducible case study
+in how structure-preservation results flatter themselves — hard-constrain the property your metric
+measures, exempt your method from a leak the baseline is forced to carry, and extrapolation plots
+will look magnificent. The audit protocol (one-variable controls, oracle recalibration, no-input
+floors, Bayes-floor comparison) transfers to any structured-memory evaluation, including published
+ones.</div>
+</div>
+
+<!-- ============================================================ SURVIVES -->
+<div class="card">
+<h2>6 &middot; What survives, honestly</h2>
+<ul>
+<li><b>The construction works as specified.</b> Exact subspace conservation under forcing, machine
+precision, verified. An <i>auditable</i> memory — the balance law \(C^\top z_t = C^\top z_s + \sum
+C^\top g_k\) is checkable online, and its defect is a principled staleness detector.</li>
+<li><b>A validated audit methodology</b> for structured-memory claims (arguably the most
+transferable artifact of the project so far).</li>
+<li><b>An open, well-posed question</b> now being tested by L0-Frontier: learned decay <i>can</i>
+represent selective protection — does SGD <i>find</i> it under train-short/test-long, and does the
+constraint buy reliability rather than expressivity? Genuinely uncertain either way.</li>
+<li><b>The L1/L2 assets are built and unblocked</b>: haystack corpus with per-block durability
+labels (retrieve / update / count — count's answer appears nowhere in the context), frozen-LM
+block-state precompute, SLURM scripts for the university cluster.</li>
+</ul>
+<p class="mut">Prior-art position: the \(K{+}S\) decomposition matches Lipschitz RNN (ICLR 2021);
+scalar/diag decay is the Mamba/S4 corner; skew is the unitary-RNN corner. The closest applied
+system, IndexMem (2026), uses learned scalar decay with no protected subspace. The pinned
+construction + balance-law framing for LLM memory remains unclaimed territory as far as we found —
+but it must first be shown to beat matched learned baselines, which it has not yet been.</p>
+</div>
+
+</div>
+
+<script>
+/* ================= animation: traditional context vs latent twin ============ */
+(function(){
+const cv = document.getElementById('anim'), ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height, MID = W/2;
+const GOLD='#e3b341', BLUE='#58a6ff', RED='#f85149', GREEN='#3fb950',
+      MUT='#8b949e', PANEL='#161b22', LINE='#30363d';
+let t = 0, playing = true, last = null;
+const PERIOD = 1400;            // frames per loop
+const N_TOK = 46;               // tokens per loop
+const WIN = 14;                 // attention window (tokens)
+const FACT_I = 6;               // index of the fact token
+const factFlux = 0.62;
+// pseudo-random but deterministic stream
+function rnd(i){ const x = Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }
+
+document.getElementById('animbtn').onclick = function(){
+  playing = !playing; this.textContent = playing ? 'Pause' : 'Play';
+  if (playing) requestAnimationFrame(frame);
+};
+
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);
+ ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+ ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+function frame(ts){
+  if(!playing) return;
+  if(last===null) last=ts;
+  t += Math.min((ts-last)/16.7, 3); last = ts;
+  const lt = t % PERIOD;                       // loop time
+  const prog = lt / PERIOD;                    // 0..1
+  const arrived = Math.min(Math.floor(prog * (N_TOK+8)), N_TOK); // tokens so far
+  document.getElementById('animclock').textContent =
+    't = ' + String(arrived).padStart(2,'0') + ' / ' + N_TOK + ' blocks';
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = LINE; ctx.beginPath();
+  ctx.moveTo(MID,10); ctx.lineTo(MID,H-10); ctx.stroke();
+
+  drawLeft(arrived, prog);
+  drawRight(arrived, prog);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- LEFT: sliding-window attention ---------- */
+function drawLeft(n, prog){
+  const x0=18, y0=26, w=MID-38;
+  ctx.fillStyle = MUT; ctx.font='600 13px Segoe UI';
+  ctx.fillText('TRADITIONAL: sliding attention window', x0, y0-8);
+
+  const tw = 9.4, gap = 1.8, rowY = y0+38;
+  const lo = Math.max(0, n-WIN);               // window start
+  const factGone = FACT_I < lo;
+
+  for(let i=0;i<n;i++){
+    const x = x0 + i*(tw+gap);
+    if (x > x0+w) break;
+    const inWin = i >= lo;
+    let col = i===FACT_I ? GOLD : BLUE, al = 1;
+    if(!inWin){ col = i===FACT_I ? RED : MUT; al = i===FACT_I ? 0.85 : 0.25; }
+    ctx.globalAlpha = al;
+    // evicted tokens sink
+    const sink = inWin ? 0 : Math.min(26, (lo-i)*2.2);
+    roundRect(x, rowY+sink, tw, 20, 2.5); ctx.fillStyle = col; ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  // window bracket
+  const wx0 = x0 + lo*(tw+gap), wx1 = x0 + n*(tw+gap);
+  ctx.strokeStyle = BLUE; ctx.globalAlpha=.7; ctx.lineWidth=1.5;
+  roundRect(wx0-3, rowY-5, Math.min(wx1,x0+w)-wx0+4, 30, 4); ctx.stroke();
+  ctx.globalAlpha=1; ctx.lineWidth=1;
+
+  // attention arcs from newest token to window members
+  if(n>1){
+    const qx = Math.min(x0 + (n-1)*(tw+gap)+tw/2, x0+w);
+    for(let i=lo;i<n-1;i+=2){
+      const ax = x0+i*(tw+gap)+tw/2; if(ax>x0+w) break;
+      const str = (i-lo)/Math.max(1,WIN);
+      ctx.strokeStyle = i===FACT_I?GOLD:BLUE; ctx.globalAlpha = .12+.3*str;
+      ctx.beginPath(); ctx.moveTo(qx,rowY);
+      ctx.quadraticCurveTo((qx+ax)/2, rowY-30-(qx-ax)/8, ax, rowY);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // status line
+  ctx.font='12.5px Segoe UI';
+  if(factGone){
+    ctx.fillStyle=RED;
+    ctx.fillText('fact evicted at block '+(FACT_I+WIN)+' — no longer attendable', x0, rowY+72);
+  } else {
+    ctx.fillStyle=MUT;
+    ctx.fillText('fact in window — attendable for '+(FACT_I+WIN-n)+' more blocks', x0, rowY+72);
+  }
+
+  // end-of-stream query
+  if(prog>0.86){
+    ctx.fillStyle=PANEL; roundRect(x0, rowY+96, w, 54, 8); ctx.fill();
+    ctx.strokeStyle=LINE; ctx.stroke();
+    ctx.font='600 13px Segoe UI'; ctx.fillStyle=MUT;
+    ctx.fillText('QUERY: what was the fact?', x0+14, rowY+118);
+    ctx.font='700 14px Segoe UI'; ctx.fillStyle=RED;
+    ctx.fillText('✗  lost — outside the window', x0+14, rowY+139);
+  }
+}
+
+/* ---------- RIGHT: latent twin memory ---------- */
+function drawRight(n, prog){
+  const x0=MID+20, y0=26, w=MID-40;
+  ctx.fillStyle = MUT; ctx.font='600 13px Segoe UI';
+  ctx.fillText('LATENT TWIN: pinned ledger + decaying complement', x0, y0-8);
+
+  // token stream (small, top)
+  const tw=9.4, gap=1.8, rowY=y0+18;
+  for(let i=0;i<n;i++){
+    const x = x0+i*(tw+gap); if(x>x0+w) break;
+    ctx.globalAlpha=.85;
+    roundRect(x,rowY,tw,12,2); ctx.fillStyle = i===FACT_I?GOLD:BLUE; ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  // encoder arrow
+  ctx.strokeStyle=MUT; ctx.globalAlpha=.6;
+  ctx.beginPath(); ctx.moveTo(x0+w/2, rowY+18); ctx.lineTo(x0+w/2, rowY+40); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x0+w/2-5,rowY+34); ctx.lineTo(x0+w/2,rowY+41);
+  ctx.lineTo(x0+w/2+5,rowY+34); ctx.stroke(); ctx.globalAlpha=1;
+  ctx.font='11.5px Consolas'; ctx.fillStyle=MUT;
+  ctx.fillText('gₖ = Enc(xₖ)', x0+w/2+12, rowY+34);
+
+  // latent state: 8 bars; bar 0 = pinned ledger
+  const NB=8, bw=26, bg=14, bx0=x0+ (w-(NB*bw+(NB-1)*bg))/2, by=rowY+140, bh=84;
+  // simulate: ledger integrates fact flux (and small deposits); free dims decay
+  let ledger=0;
+  for(let i=0;i<n;i++){
+    ledger += (i===FACT_I? factFlux : (rnd(i)<0.12? 0.09*rnd(i+51):0));
+  }
+  const ledgerH = Math.min(bh, 12+ledger*54);
+
+  for(let b=0;b<NB;b++){
+    const x = bx0 + b*(bw+bg);
+    // slot outline
+    ctx.strokeStyle=LINE; roundRect(x,by-bh,bw,bh,4); ctx.stroke();
+    if(b===0){
+      ctx.fillStyle=GOLD;
+      roundRect(x, by-ledgerH, bw, ledgerH, 4); ctx.fill();
+    } else {
+      // free component: driven noise * exp decay since last big kick
+      const phase = (n*0.7 + b*13.7);
+      const v = Math.abs(Math.sin(phase*0.9+b))* Math.exp(-((n%17)/17)*2.2) *0.75 + 0.06;
+      const hh=Math.max(4, v*bh);
+      ctx.globalAlpha=.8; ctx.fillStyle=BLUE;
+      roundRect(x, by-hh, bw, hh, 4); ctx.fill(); ctx.globalAlpha=1;
+    }
+  }
+  ctx.font='11px Consolas'; ctx.fillStyle=GOLD;
+  ctx.fillText('Cᵀz (exact)', bx0-4, by+16);
+  ctx.fillStyle=MUT;
+  ctx.fillText('free components: eᵗᵂ decay', bx0+bw+bg+6, by+16);
+
+  // balance-law counter
+  ctx.font='12.5px Consolas'; ctx.fillStyle=MUT;
+  ctx.fillText('balance law:', x0, by+44);
+  ctx.fillStyle=GOLD;
+  ctx.fillText('Cᵀz = Σ Cᵀgₖ = '+ledger.toFixed(3)+'   (drift ≤ 3e-13)',
+               x0+96, by+44);
+
+  // end-of-stream query
+  if(prog>0.86){
+    ctx.fillStyle=PANEL; roundRect(x0, by+62, w, 54, 8); ctx.fill();
+    ctx.strokeStyle=LINE; ctx.stroke();
+    ctx.font='600 13px Segoe UI'; ctx.fillStyle=MUT;
+    ctx.fillText('QUERY: what was the fact?', x0+14, by+84);
+    ctx.font='700 14px Segoe UI'; ctx.fillStyle=GREEN;
+    ctx.fillText('✓  read from pinned ledger — exact after '
+      +(n-FACT_I)+' blocks', x0+14, by+105);
+  }
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

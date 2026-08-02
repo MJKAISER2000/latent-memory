@@ -72,27 +72,40 @@ Verifies `max|CᵀW|`, skewness of `K`, `eig(W+Wᵀ) ≤ 0`, ledger drift over t
 binary-powering vs. `torch.matrix_exp`, and the driven balance law. All pass.
 Residuals are float32 precision — confirmed by rerunning under `torch.float64`.
 
-### 1. L0 — synthetic ledger, extrapolation test
+### 1. L0 — synthetic ledger, extrapolation test — **RETRACTED AS AN ARTIFACT**
 
 ```bash
 python toy_ledger.py
 ```
 
-Trains at K=64, tests at K=1024, across four generator modes. ~20 min
-(`free` alone takes ~15 min — Padé scaling-and-squaring slows as ‖W‖ grows).
-Output: [results_L0_seed0.txt](results_L0_seed0.txt).
+> **RETRACTION (adversarial audit, Aug 2026).** The headline result below —
+> "pinned is 12.7–29× better at 16× extrapolation" — is an artifact. The decay
+> floor `eps=1e-3` was applied as `−εI` to the dissipative baseline but `−εP`
+> to pinned (exempting the protected direction), and `ε·K_test = 1.024`: the
+> baseline was architecturally forced to leak on exactly the test timescale
+> (`gain = e^{−εt} ≈ 0.36` at t=1024). One-variable control: with `ε=0`, the
+> dissipative baseline scores 0.0553; after a single oracle scale+offset,
+> 0.0111 vs pinned's 0.0112 with identical correlation (0.9878). **Advantage:
+> 1.00×.** Additional confounds: pinned had 2× the live generator parameters;
+> the readout had no gain/bias; the task label is the pinned mode's built-in
+> invariant; `init_spectral=0.03` put the conservative mode's rotation period
+> between the train and test horizons. The `1/√t` "prediction" is a property
+> of the metric, not evidence. Also: calling the fixed-ε dissipative mode the
+> "Mamba/IndexMem corner" was a misattribution — their decay is *learned*,
+> with no floor. See `l0_frontier.py` for the corrected experiment.
+
+Original (artifact-contaminated) numbers, kept for the record:
 
 | mode | t=64 | t=128 | t=256 | t=512 | t=1024 |
 |---|---|---|---|---|---|
 | free | 0.0469 | 0.0370 | 0.0384 | 0.0524 | 0.0902 |
-| dissipative *(Mamba corner)* | 0.0435 | 0.0356 | 0.0790 | 0.1771 | 0.3397 |
-| conservative *(DeltaNet corner)* | 0.0470 | 0.0384 | 0.0582 | 0.1597 | 0.5021 |
-| **pinned** | 0.0456 | 0.0359 | **0.0229** | **0.0148** | **0.0116** |
+| dissipative (fixed ε — see retraction) | 0.0435 | 0.0356 | 0.0790 | 0.1771 | 0.3397 |
+| conservative | 0.0470 | 0.0384 | 0.0582 | 0.1597 | 0.5021 |
+| pinned | 0.0456 | 0.0359 | 0.0229 | 0.0148 | 0.0116 |
 
-Tied in-distribution; `pinned` is 29×/43× better than the baselines at 16×
-extrapolation. Its relative error falls as `1/√t` — predicted 0.250, observed 0.254.
-
-Ignore the t=16 column: `M_16 ≈ 0`, so relative error explodes on the denominator.
+What survives: pinned is a genuinely working accumulator (~1.55× the Bayes
+floor, corr 0.987 with the sample-specific total). What does not survive: any
+claim of superiority over a fairly-specified scalar-decay baseline.
 
 ### 2. Seed robustness
 
@@ -188,13 +201,21 @@ applied to LMs. Same destination, different mechanism.
 
 ## Status
 
-- [x] Structured generator + verified guarantees
-- [x] L0 synthetic ledger — passed kill criterion
+- [x] Structured generator + verified guarantees (this part never wavered)
+- [x] L0 synthetic ledger — **retracted as an artifact** (see §1 retraction)
 - [x] Seed robustness check
-- [x] Haystack synthesizer (retrieve / update / count)
-- [x] LM state precompute
-- [ ] L0.5 anchor transport
-- [ ] L1 memory training on real states + retention curves
-- [ ] L2 KV cache, vs. sliding-window + IndexMem-style scalar-decay baseline
+- [x] L0.5 anchor transport — **falsified**: sparse ≈ dense for every mode
+      (interior errors 0.164/0.145/0.143); transport comes from the shared
+      encoder, not conservation
+- [x] Degeneracy fix (rate jitter) + correlation/skill diagnostics
+- [x] Adversarial audit — found the ε artifact; audit protocol in
+      `results/` and `dashboard.html`
+- [x] Haystack synthesizer (retrieve / update / count) + LM state precompute
+- [ ] L0-Frontier (`l0_frontier.py`) — corrected experiment: learned decay
+      everywhere, matched params, capacity pressure, gated deposits. The open
+      question: does SGD find selective protection, or does the constraint buy
+      optimization reliability?
+- [ ] L1/L2 — only if the frontier shows a real, fairly-measured effect
 
-See [PLAN.md](PLAN.md) for the full ladder and kill criteria.
+Open `dashboard.html` in a browser for the full story with math and animation.
+See [PLAN.md](PLAN.md) for the ladder and kill criteria.

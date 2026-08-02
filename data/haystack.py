@@ -97,6 +97,8 @@ class HaystackConfig:
     n_updates: int = 3                  # revisions per fact (task="update")
     n_deposits: int = 8                 # deposits per entity (task="count")
     depths: tuple = (0.1,)              # fractional positions of the needles
+    depth_random: bool = False          # sample depth per-sample instead
+    depth_range: tuple = (0.02, 0.90)   # range used when depth_random
     distractor_ratio: float = 0.25      # fraction of filler that mimics needles
     seed: int = 0
 
@@ -179,7 +181,18 @@ def make_sample(cfg: HaystackConfig, rng: random.Random) -> Sample:
     ]
 
     # Place durable statements at the requested fractional depths.
-    if len(cfg.depths) >= len(durable):
+    if cfg.depth_random:
+        # One depth drawn per sample. Binning by the realised needle->query
+        # distance at eval time then yields a continuous retention curve from a
+        # single dataset, instead of one dataset per depth.
+        lo, hi = cfg.depth_range
+        d0 = lo + (hi - lo) * rng.random()
+        if len(durable) == 1:
+            depths = [d0]
+        else:
+            span = min(hi - d0, 0.8)
+            depths = [d0 + span * i / (len(durable) - 1) for i in range(len(durable))]
+    elif len(cfg.depths) >= len(durable):
         depths = list(cfg.depths)[:len(durable)]
     else:
         # spread remaining statements evenly after the first given depth
@@ -268,6 +281,8 @@ def main():
     ap.add_argument("--n", type=int, default=200, help="samples")
     ap.add_argument("--n-filler", type=int, default=2000)
     ap.add_argument("--depths", default="0.1", help="comma-separated fractions")
+    ap.add_argument("--depth-random", action="store_true",
+                    help="sample needle depth per-sample -> continuous distance curve")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--tokenizer", default=None,
                     help="HF id, e.g. Qwen/Qwen2.5-0.5B. Omit for text-only.")
@@ -277,6 +292,7 @@ def main():
     cfg = HaystackConfig(
         task=args.task, n_filler=args.n_filler, seed=args.seed,
         depths=tuple(float(x) for x in args.depths.split(",")),
+        depth_random=args.depth_random,
     )
     ds = make_dataset(cfg, args.n)
 

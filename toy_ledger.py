@@ -48,10 +48,28 @@ DEPOSIT_P = 0.15
 STEPS, BATCH, LR = 3000, 64, 3e-3
 MODES = ["free", "dissipative", "conservative", "pinned"]
 
+# --- task degeneracy control -------------------------------------------------
+# With a FIXED deposit rate shared by every sample, M_t concentrates:
+#   E[M_t] = 0.075t, SD[M_t] = sqrt(0.0444t), so SD/E ~ 1/sqrt(t) -> 0.
+# A constant predictor emitting 0.075t then scores 7% relative error at t=1024
+# without reading the input at all, which makes effect sizes uninterpretable.
+#
+# RATE_JITTER draws a per-sample rate p_i ~ U(RATE_LO, RATE_HI). The spread of
+# M_t across samples is then dominated by rate variation, which does NOT shrink
+# with t:  SD/E = SD(p)/E(p) = const (~38%). A model must genuinely track the
+# sample rather than emit the population mean.
+RATE_JITTER = False
+RATE_LO, RATE_HI = 0.05, 0.25
+
 
 def make_batch(B: int, K: int, gen: torch.Generator, v: torch.Tensor):
     """x: (B,K,D_IN)  a: (B,K)  M: (B,K+1) running total  content: (B,K,D_IN)"""
-    mask = (torch.rand(B, K, generator=gen, device=DEV) < DEPOSIT_P).float()
+    if RATE_JITTER:
+        p = RATE_LO + (RATE_HI - RATE_LO) * torch.rand(
+            B, 1, generator=gen, device=DEV)
+    else:
+        p = torch.full((B, 1), DEPOSIT_P, device=DEV)
+    mask = (torch.rand(B, K, generator=gen, device=DEV) < p).float()
     a = mask * torch.rand(B, K, generator=gen, device=DEV)
     content = 0.5 * torch.randn(B, K, D_IN, generator=gen, device=DEV)
     x = a[..., None] * v + content
@@ -72,7 +90,19 @@ def evaluate(model, gen, v, K: int, B: int = 64):
     return rel
 
 
-def train_one(mode: str, seed: int = 0):
+def train_one(mode: str, seed: int = 0, supervision: str = "dense"):
+    """supervision:
+         dense  -- ledger supervised at EVERY prefix t = 0..K_TRAIN (L0 setting)
+         sparse -- ledger supervised ONLY at t = K_TRAIN (the L0.5 anchor test)
+
+    Under `sparse`, the pinned model should still be correct at every other
+    horizon: the balance law C^T z_t = C^T z_0 + sum_k C^T g_k, plus a shared
+    per-block encoder, means one supervised time point identifies the flux
+    function -- which then transports to all t. Baselines have no such
+    mechanism and should fail at unsupervised horizons in BOTH directions
+    (interior t < 64 as well as exterior t > 64).
+    """
+    assert supervision in {"dense", "sparse"}
     torch.manual_seed(seed)
     gen = torch.Generator(device=DEV).manual_seed(seed + 1)
     v = torch.randn(D_IN, generator=gen, device=DEV)
@@ -87,9 +117,11 @@ def train_one(mode: str, seed: int = 0):
         x, a, M, content = make_batch(BATCH, K_TRAIN, gen, v)
         zs, g = model.rollout(x)
 
-        # LEDGER loss on every prefix (all horizons up to K_TRAIN)
         pred = model.ledger(zs.reshape(-1, N_Z)).reshape(BATCH, K_TRAIN + 1, -1)[..., 0]
-        l_ledger = F.mse_loss(pred, M)
+        if supervision == "dense":
+            l_ledger = F.mse_loss(pred, M)              # every prefix
+        else:
+            l_ledger = F.mse_loss(pred[:, -1], M[:, -1])  # ONE horizon only
 
         # CONTENT loss: reconstruct the current block from the memory state
         recon = model.dec(zs[:, 1:].reshape(-1, N_Z)).reshape(BATCH, K_TRAIN, D_IN)

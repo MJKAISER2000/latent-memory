@@ -1,0 +1,4 @@
+L0-FRONTIER  n_z=8 d_in=32  gated+jittered ledger, capacity pressure
+modes=['scalar', 'diag', 'ks', 'pinned'] seeds=[0, 1, 2]
+
+  s0  scalar: led@1024 corr=+0.178 skill=-6.651 | con early=0.253 late=0.317 | decay[min=7.75e-04 med=7.75e-04] align=0.64 (268s)
