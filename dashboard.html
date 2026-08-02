@@ -188,15 +188,18 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
   explanation of a seductive false positive.</span>
 </div>
 
-<div class="tl-item run">
-  <h3>L0-Frontier &mdash; the corrected experiment <span class="pill p-run" id="frontier-pill">RUNNING</span></h3>
-  The question that survives: under <b>capacity pressure</b> (\(n_z{=}8\), content reconstruction
-  forces forgetting; ledger retention forbids it on one direction), does <i>learned</i> decay
-  discover selective protection on its own, or does the architectural constraint matter for
-  <b>optimization reliability</b>? All audit fixes applied: learned decay everywhere (no floors),
-  matched parameterizations incl. unpinned \(K{+}S\), identical affine readouts, gated deposits
-  \(a_k = \text{flag}_k\cdot\text{amount}_k\) so the label is no mode's built-in invariant.
-  <span id="frontier-inline" class="mut">Results will replace this line.</span>
+<div class="tl-item find">
+  <h3>L0-Frontier &mdash; the corrected experiment
+  <span class="pill p-find" id="frontier-pill">FINDING (seed 0; replication running)</span></h3>
+  Under <b>capacity pressure</b>, where forgetting is necessary but ledger retention forbids it on
+  one direction, and with every audit fix applied: <b>gradient descent does not discover selective
+  protection even when the parameterization can represent it.</b> Learned decay parks in the
+  train-horizon flat basin (\(d \approx 7{-}8\times10^{-4}\): invisible over 64 steps, fatal over
+  1024). The soft \(K{+}S\) mode finds the right <i>direction</i> (align 0.98) but its residual
+  leak halves its skill. The hard \(C^\top W = 0\) constraint alone wins both axes — ledger skill
+  +1.00 <i>and</i> best content among protecting modes — while forgetting aggressively everywhere
+  else. <span class="mut">The surviving claim is about optimization, not expressivity: hard
+  structure substitutes for gradient pressure that short-horizon training cannot provide.</span>
 </div>
 
 </div>
@@ -245,9 +248,43 @@ construction.</p>
 &rArr; single-anchor transport is a property of the shared encoder, not of conservation.
 The pinned-vs-dissipative gap in this table is the &epsilon; artifact again.</p>
 
-<h3 id="frontier-h3">L0-Frontier <span class="pill p-run" id="frontier-pill2">RUNNING</span></h3>
-<div id="frontier-results"><p class="mut">Corrected experiment in progress &mdash; learned decay
-everywhere, matched params, capacity pressure. This section updates when it lands.</p></div>
+<h3 id="frontier-h3">L0-Frontier &mdash; the corrected experiment
+<span class="pill p-part" id="frontier-pill2">SEED 0 &middot; 2 MORE RUNNING</span></h3>
+<div id="frontier-results">
+<p>All audit fixes applied: <b>learned</b> decay everywhere (softplus, identical init, no floors),
+matched parameterizations, identical affine readouts \( \hat M = \gamma\,\langle r, z\rangle + b\),
+gated deposits \(a_k=\text{flag}_k\cdot\text{amount}_k\), per-sample rate jitter, and capacity
+pressure (\(n_z{=}8\), \(d_{\text{in}}{=}32\), content reconstruction at the test horizon).
+Trained at \(K{=}64\), evaluated at \(t{=}1024\):</p>
+<table>
+<tr><th>mode</th><th>can it protect?</th><th>ledger skill @1024</th>
+<th>content MSE late</th><th>slowest decay</th><th>align w/ readout</th></tr>
+<tr><td>scalar (IndexMem-style learned &lambda;)</td><td class="mut">no — uniform</td>
+<td class="bad">&minus;6.65</td><td>0.317</td><td>7.8&times;10<sup>-4</sup></td><td>0.64</td></tr>
+<tr><td>diag (Mamba-style per-dim learned decay)</td><td class="mut">yes — didn't find it</td>
+<td class="bad">&minus;5.98</td><td>0.356</td><td>7.2&times;10<sup>-4</sup></td><td>0.64</td></tr>
+<tr><td>ks (full K+S, soft)</td><td class="mut">yes — <i>approximately</i> found it</td>
+<td>+0.49</td><td class="bad">1.261</td><td>6.7&times;10<sup>-4</sup></td><td>0.98</td></tr>
+<tr><td>pinned (hard \(C^\top W{=}0\))</td><td class="green">by construction</td>
+<td class="hi">+1.00</td><td class="hi">0.714</td><td class="gold">0 (exact)</td>
+<td class="gold">1.00</td></tr>
+</table>
+<p><b>The gradient across modes is the finding.</b> Learned decay parks in a flat basin: any rate
+below \(\sim 1/K_{\text{train}}\) is invisible during training
+(\(e^{-7.8\times10^{-4}\cdot 64}\!\approx\!0.95\)) yet fatal at test
+(\(e^{-7.8\times10^{-4}\cdot 1024}\!\approx\!0.45\)); SGD gets no gradient signal to push it to
+zero. <code>diag</code> could represent the pinned solution and never found it. <code>ks</code>
+found the <i>direction</i> (0.98 aligned) but its residual leak still cost half its skill, and it
+paid on content. The hard constraint delivers exactly what optimization won't:
+<b>zero decay on the protected direction, aggressive forgetting (median decay 4.1) everywhere
+else — winning both axes.</b></p>
+<p class="mut">Scope honestly: one seed so far (two more in flight); a synthetic accumulation
+task, chosen because accumulation is the one thing a conserved ledger is <i>for</i> — the L1
+question is whether real-LM `count`-style tasks inherit the effect. Also note a real design issue
+surfaced: the unbounded accumulator direction drifts out of the decoder's training range at long
+horizon (all protecting modes show content-late degradation), suggesting bounded ledger encodings
+(means, not sums) for L1.</p>
+</div>
 </div>
 
 <!-- ============================================================ FAILURE LEDGER -->
@@ -302,9 +339,12 @@ precision, verified. An <i>auditable</i> memory — the balance law \(C^\top z_t
 C^\top g_k\) is checkable online, and its defect is a principled staleness detector.</li>
 <li><b>A validated audit methodology</b> for structured-memory claims (arguably the most
 transferable artifact of the project so far).</li>
-<li><b>An open, well-posed question</b> now being tested by L0-Frontier: learned decay <i>can</i>
-represent selective protection — does SGD <i>find</i> it under train-short/test-long, and does the
-constraint buy reliability rather than expressivity? Genuinely uncertain either way.</li>
+<li><b>The frontier finding (seed 0, replication in flight):</b> learned decay <i>can</i>
+represent selective protection but SGD does not <i>find</i> it under train-short/test-long — the
+flat basin below \(d\sim 1/K_{\text{train}}\) gives no gradient signal. The hard constraint buys
+<b>optimization reliability, not expressivity</b>. If it replicates, this is the defensible core
+claim, and it makes a concrete prediction for real systems: IndexMem-style learned-&lambda;
+memories should under-retain at horizons beyond their training length, fixably by pinning.</li>
 <li><b>The L1/L2 assets are built and unblocked</b>: haystack corpus with per-block durability
 labels (retrieve / update / count — count's answer appears nowhere in the context), frozen-LM
 block-state precompute, SLURM scripts for the university cluster.</li>
