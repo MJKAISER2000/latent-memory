@@ -298,7 +298,7 @@ Trained at \(K{=}64\), evaluated at \(t{=}1024\). <b>Three seeds, mean&nbsp;&plu
 <td class="hi">+1.000 &plusmn; 0.000</td><td class="hi">0.62 &plusmn; 0.10</td>
 <td class="gold">0 (exact)</td><td class="gold">1.00</td></tr>
 </table>
-<p class="mut">The learned decays converged to 7.2&ndash;9.0&times;10<sup>-4</sup> across every
+<p class="mut">The learned decays converged to 6.7&ndash;9.0&times;10<sup>-4</sup> across every
 mode and seed. The SNR probe later showed this tight clustering is an <b>attractor of the
 training objective</b> (gradient pushes decay up from below, down from above), not inertia at the
 init — training <i>selects</i> the under-retaining rate.</p>
@@ -422,7 +422,7 @@ the training gradient pushes decay <b>up</b>, above \(3\times10^{-3}\) it pushes
 <b>down</b> — the short-horizon objective has an <b>interior optimum</b> \(d^\*\!\approx\!
 7\times10^{-4}\) (mild forgetting cuts interference over 64 steps; the ledger cost
 \(e^{-d^\*K_{\text{train}}}\!\approx\!0.95\) is absorbed by the learned gain). Every learned mode
-converged to exactly this attractor (7.2&ndash;9.0&times;10<sup>-4</sup>, all seeds). At
+converged to exactly this attractor (6.7&ndash;9.0&times;10<sup>-4</sup>, all seeds). At
 \(K_{\text{test}}=16K_{\text{train}}\), that same optimum gives gain
 \(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) — catastrophic. <b>Training doesn't fail to find
 protection; it actively trades it away at the horizon it can see.</b> Consequence: no
@@ -434,7 +434,7 @@ fixes, <b>3/3 seeds</b>: scalar skill &minus;6.54&plusmn;0.21; diag &minus;6.12&
 seeds zero a direction); soft K+S finds the direction every seed (align 0.89&ndash;0.98) but keeps
 a \(\sim\!7{\times}10^{-4}\) leak, skill +0.25&plusmn;0.17; <b>pinned +1.000&plusmn;0.000</b> with
 exact zero decay and the best, most stable content (0.62&plusmn;0.10). Every learned decay parked
-at 7.2&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
+at 6.7&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
 sub-critical region \(dK_{\text{train}}\!<\!0.1\), \(L_{\text{train}}\) varies 6,365&times; less
 than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-critical.
 <span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 8&ndash;11 at all
