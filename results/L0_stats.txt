@@ -1,3 +1,7 @@
 n=10 stats run | arms=['scalar', 'diag', 'ks', 'diag0', 'scalar0', 'pinned']
 
   s0  scalar: skill=-6.651 late=0.317 dmin=7.75e-04
+  s0    diag: skill=-5.981 late=0.356 dmin=7.22e-04
+  s0      ks: skill=+0.486 late=1.261 dmin=6.73e-04
+  s0   diag0: skill=+0.999 late=0.272 dmin=2.05e-09
+  s0 scalar0: skill=+1.000 late=0.269 dmin=2.08e-09

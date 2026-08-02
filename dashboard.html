@@ -404,6 +404,68 @@ horizon (all protecting modes show content-late degradation), suggesting bounded
 </div>
 </div>
 
+<!-- ============================================================ INTERACTIVE -->
+<div class="card" id="sec-interactive">
+<h2>4.5 &middot; Hands-on &mdash; drag through the measured data</h2>
+<p class="mut" style="margin-top:-6px">Both widgets replay <b>actual logged numbers</b> from the
+result files (nothing simulated except the two \(e^{-dt}\) gain read-outs, which are arithmetic).</p>
+
+<div class="grid2">
+<div>
+<h3>A &middot; The attractor: sweep the decay rate \(d\)</h3>
+<p class="mut" style="font-size:13px">22-point landscape scan of a trained scalar model
+(<span class="mono">L0_mechanism.txt</span>), gradient direction from the SNR probe
+(<span class="mono">L0_snr.txt</span>). Find the spot where the two losses disagree.</p>
+<input type="range" id="dslider" min="0" max="21" value="11" step="1"
+       style="width:100%;accent-color:var(--gold)">
+<div class="mono" style="display:flex;justify-content:space-between;font-size:12px;
+     color:var(--mut)"><span>d = 10&#8315;&#8310;</span><span id="dcur" class="gold"></span>
+     <span>d = 0.5</span></div>
+<div style="margin-top:12px">
+  <div style="font-size:12.5px;margin-bottom:3px">L<sub>train</sub> (what SGD sees)
+    <span id="ltr-v" class="mono gold" style="float:right"></span></div>
+  <div style="background:var(--panel2);border-radius:5px;height:14px;overflow:hidden">
+    <div id="ltr-bar" style="height:100%;background:var(--gold);width:0%;
+         transition:width .12s"></div></div>
+  <div style="font-size:12.5px;margin:9px 0 3px">L<sub>test</sub> @ 16&times; horizon (what
+    matters) <span id="lte-v" class="mono blue" style="float:right"></span></div>
+  <div style="background:var(--panel2);border-radius:5px;height:14px;overflow:hidden">
+    <div id="lte-bar" style="height:100%;background:var(--blue);width:0%;
+         transition:width .12s"></div></div>
+</div>
+<div class="mono" style="font-size:12.5px;margin-top:10px;line-height:1.8">
+  gain e<sup>&minus;d&middot;64</sup> (train) = <span id="g64" class="green"></span>
+  &nbsp;&middot;&nbsp; e<sup>&minus;d&middot;1024</sup> (test) = <span id="g1024"></span><br>
+  measured training gradient: <span id="gdir"></span>
+</div>
+<div class="note" id="dnote" style="min-height:74px;font-size:13.5px"></div>
+</div>
+
+<div>
+<h3>B &middot; Extrapolation: sweep the test horizon \(t\)</h3>
+<p class="mut" style="font-size:13px">3-seed mean relative ledger error
+(<span class="mono">results_L0_seeds.txt</span>), trained only to t=64.
+<a class="xref" style="font-size:11px" onclick="return goto('page-log','sec-failures')">
+&#9888; artifact-era data — the baseline gap is the &epsilon; artifact (§5)</a> — kept
+interactive precisely because it shows how convincing a rigged race looks.</p>
+<input type="range" id="tslider" min="0" max="4" value="0" step="1"
+       style="width:100%;accent-color:var(--blue)">
+<div class="mono" style="display:flex;justify-content:space-between;font-size:12px;
+     color:var(--mut)"><span>t=64 (trained)</span><span id="tcur" class="blue"></span>
+     <span>t=1024 (16&times;)</span></div>
+<div id="hbars" style="margin-top:12px"></div>
+<div class="note" id="tnote" style="min-height:56px;font-size:13.5px"></div>
+</div>
+</div>
+
+<div class="prov"><span class="prov-label">Data</span>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt</a>
+<a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
+<a class="xref file" href="results_L0_seeds.txt" target="_blank">results_L0_seeds.txt</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md</a>
+</div>
+</div>
+
 <!-- ============================================================ FAILURE LEDGER -->
 <div class="card" id="sec-failures">
 <h2>5 &middot; Failure ledger &mdash; the &epsilon; artifact, in full</h2>
@@ -890,6 +952,112 @@ function goto(page, anchor){
   return false;
 }
 document.querySelectorAll('.tab').forEach(b=>{ b.onclick=()=>goto(b.dataset.page); });
+</script>
+
+<script>
+/* ============ hands-on sliders: actual logged data, nothing simulated ======= */
+(function(){
+/* Widget A: landscape scan, results/L0_mechanism.txt (22 points, verbatim) */
+const D=[1.00e-6,1.87e-6,3.49e-6,6.52e-6,1.22e-5,2.28e-5,4.25e-5,7.94e-5,1.48e-4,
+         2.77e-4,5.18e-4,9.68e-4,1.81e-3,3.38e-3,6.31e-3,1.18e-2,2.20e-2,4.11e-2,
+         7.69e-2,1.44e-1,2.68e-1,5.01e-1];
+const LTR=[0.0224,0.0224,0.0223,0.0222,0.0219,0.0214,0.0206,0.0190,0.0163,0.0118,
+           0.0055,0.0011,0.0167,0.1213,0.5334,1.8214,5.0442,11.0775,18.8530,
+           25.6593,30.1938,32.8460];
+const LTE=[8407.6,8404.8,8399.7,8390.5,8372.6,8340.2,8280.3,8171.5,7979.5,7655.9,
+           7157.0,6506.7,5901.2,5726.7,6250.9,7198.2,8033.8,8568.2,8870.2,9034.1,
+           9122.0,9168.7];
+/* SNR probe, results/L0_snr.txt: signed mean gradient dL/ds + SNR (10 points) */
+const SD=[1e-5,3.16e-5,1e-4,3.16e-4,1e-3,3.16e-3,1e-2,3.16e-2,1e-1,3.16e-1];
+const SMU=[-4.54e-4,-1.40e-3,-4.15e-3,-9.60e-3,1.36e-3,0.284,2.60,10.08,11.04,4.20];
+const SNR=[10.42,10.49,11.06,9.15,1.31,8.13,10.41,9.09,9.71,11.23];
+
+const $=id=>document.getElementById(id);
+const fmt=(v,p=3)=>{
+  if(v===0) return "0";
+  const a=Math.abs(v);
+  return (a<1e-2||a>=1e4)?v.toExponential(2):v.toPrecision(p);
+};
+function nearestSNR(d){
+  let bi=0,bd=1e9;
+  SD.forEach((x,i)=>{const dd=Math.abs(Math.log10(x)-Math.log10(d));
+    if(dd<bd){bd=dd;bi=i}});
+  return bi;
+}
+function updA(){
+  const i=+$('dslider').value, d=D[i];
+  $('dcur').textContent='d = '+fmt(d)+'  (d·K_train = '+fmt(d*64,2)+')';
+  const wtr=100*(Math.log10(LTR[i])-Math.log10(8e-4))/(Math.log10(33)-Math.log10(8e-4));
+  $('ltr-bar').style.width=Math.max(1.5,wtr)+'%';
+  $('ltr-v').textContent=fmt(LTR[i])+(i===11?'  ← its minimum':'');
+  const wte=100*(LTE[i]-5500)/(9200-5500);
+  $('lte-bar').style.width=Math.max(1.5,wte)+'%';
+  $('lte-v').textContent=fmt(LTE[i],4);
+  $('g64').textContent=fmt(Math.exp(-d*64),3);
+  $('g1024').textContent=fmt(Math.exp(-d*1024),3);
+  const s=nearestSNR(d), up=SMU[s]<0;
+  $('gdir').innerHTML=(up?'<span class="gold">pushes decay UP &#8593; toward the '+
+    'attractor</span>':'<span class="blue">pushes decay DOWN &#8595; back toward the '+
+    'attractor</span>')+' <span class="mut">(SNR '+SNR[s].toFixed(1)+
+    ' — clearly visible to Adam)</span>';
+  let note;
+  if(i<10) note='<b>Sub-critical.</b> Train loss is within 2&times; of flat, yet the '+
+    'measured gradient still points UP — the objective actively prefers more decay '+
+    'than this. Test loss is already '+fmt(LTE[i]/5726.7,3)+'&times; its own best.';
+  else if(i<13) note='<b>The attractor.</b> SGD converged to d = 7.75e-4 in this zone — '+
+    'the train minimum (0.0011 at d=9.68e-4). Same spot at test horizon: gain '+
+    'e<sup>&minus;d·1024</sup> = '+fmt(Math.exp(-d*1024),2)+
+    '. Optimal at 64 steps, catastrophic at 1024.';
+  else note='<b>Super-critical.</b> Both losses climb and the gradient pushes decay '+
+    'back DOWN. Training sees and corrects this side — which is exactly why it never '+
+    'leaves the attractor.';
+  $('dnote').innerHTML=note;
+}
+$('dslider').addEventListener('input',updA);
+
+/* Widget B: 3-seed mean relative error, results_L0_seeds.txt + analytic constant */
+const T=[64,128,256,512,1024];
+const SERIES=[
+  ['dissipative (fixed ε — §5)', [0.0720,0.0528,0.0838,0.1814,0.3447], 'var(--red)'],
+  ['conservative (rotation)',    [0.0748,0.0515,0.0513,0.1476,0.4676], 'var(--purple)'],
+  ['pinned',                     [0.0732,0.0538,0.0413,0.0317,0.0270], 'var(--green)'],
+  ['no-input constant predictor',[0.2801,0.1981,0.1401,0.0990,0.0700], 'var(--mut)'],
+];
+const hb=$('hbars');
+const rows=SERIES.map(([name,vals,col])=>{
+  const row=document.createElement('div');
+  row.innerHTML='<div style="font-size:12.5px;margin:7px 0 3px">'+name+
+    '<span class="mono" style="float:right"></span></div>'+
+    '<div style="background:var(--panel2);border-radius:5px;height:13px;'+
+    'overflow:hidden"><div style="height:100%;background:'+col+
+    ';width:0%;transition:width .12s"></div></div>';
+  hb.appendChild(row);
+  return row;
+});
+function updB(){
+  const i=+$('tslider').value;
+  $('tcur').textContent='t = '+T[i]+'  ('+(T[i]/64)+'× the training horizon)';
+  SERIES.forEach(([name,vals],j)=>{
+    const v=vals[i];
+    const w=100*(Math.log10(v)-Math.log10(0.02))/(Math.log10(0.55)-Math.log10(0.02));
+    rows[j].querySelector('span').textContent=v.toFixed(4);
+    rows[j].querySelectorAll('div div')[0].style.width=Math.max(1.5,w)+'%';
+  });
+  let note;
+  if(i===0) note='<b>In-distribution:</b> all three modes tied (~0.073) and all '+
+    'comfortably beat the no-input constant. Nothing to see — yet.';
+  else if(i<4) note='The baselines turn upward while pinned keeps improving. At t='+T[i]+
+    ' dissipative is '+(SERIES[0][1][i]/SERIES[2][1][i]).toFixed(1)+
+    '× worse than pinned.';
+  else note='<b>The seductive endpoint:</b> baselines are now 5–6.7× worse than '+
+    'IGNORING THE INPUT; pinned beats the constant by 2.6×. This plot launched the '+
+    'project’s biggest wrong claim — the gap is mostly the ε artifact (§5). '+
+    'Drag back and forth and notice how convincing it looks anyway.';
+  $('tnote').innerHTML=note;
+}
+$('tslider').addEventListener('input',updB);
+updA(); updB();
+})();
 </script>
 
 <script>
