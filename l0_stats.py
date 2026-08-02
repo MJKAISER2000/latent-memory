@@ -30,12 +30,17 @@ import l0_frontier as L
 from l0_mechanism import train_variant
 
 SEEDS = list(range(10))
-ARMS = ["scalar", "diag", "ks", "diag0", "pinned"]
+# scalar0 added after the rescue suite: frozen-zero scalar decay swept both
+# axes (skill +1.000, content 0.266) -- it is now the strongest baseline fix
+# and the comparison pinned-vs-scalar0 is the package's most important row.
+ARMS = ["scalar", "diag", "ks", "diag0", "scalar0", "pinned"]
 
 
 def run_arm(arm: str, seed: int):
     if arm == "diag0":
         return train_variant("diag", seed, "init0")
+    if arm == "scalar0":
+        return train_variant("scalar", seed, "init0")
     model, _ = L.train_one(arm, seed)
     return L.evaluate(model, seed)
 
@@ -84,7 +89,9 @@ def main():
     for a, b, what in [("pinned", "scalar", "superiority"),
                        ("pinned", "diag", "superiority"),
                        ("pinned", "ks", "superiority"),
-                       ("pinned", "diag0", "fix-parity")]:
+                       ("pinned", "diag0", "fix-parity"),
+                       ("pinned", "scalar0", "fix-parity"),
+                       ("scalar0", "scalar", "init0-fix")]:
         d = col(a, "skill") - col(b, "skill")
         wins = int((d > 0).sum())
         p = sign_test(wins, len(d))

@@ -11,89 +11,173 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#30363d;
-    --tx:#e6edf3; --mut:#8b949e; --gold:#e3b341; --green:#3fb950;
-    --red:#f85149; --blue:#58a6ff; --purple:#bc8cff; --amber:#d29922;
+    --bg:#0b0e14; --panel:#12161f; --panel2:#1a2030; --line:#242b3d;
+    --line2:#2e3750; --tx:#e8edf6; --mut:#8b96ab; --gold:#e8b649;
+    --green:#41c463; --red:#f66151; --blue:#5aa2ff; --purple:#b78aff;
+    --amber:#d9a03c; --grad:linear-gradient(90deg,#e8b649,#5aa2ff);
   }
   *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--tx);
-       font:15px/1.6 "Segoe UI",system-ui,sans-serif}
-  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px}
-  h1{font-size:26px;margin:0 0 4px} h2{font-size:20px;margin:0 0 12px}
-  h3{font-size:16px;margin:0 0 8px}
-  .sub{color:var(--mut);margin-bottom:26px}
-  .card{background:var(--panel);border:1px solid var(--line);
-        border-radius:10px;padding:20px 22px;margin-bottom:22px}
+       font:15px/1.62 "Segoe UI Variable Text","Segoe UI",Inter,system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+       background:
+         radial-gradient(1100px 420px at 78% -10%, rgba(90,162,255,.07), transparent 60%),
+         radial-gradient(900px 380px at 12% -6%, rgba(232,182,73,.06), transparent 55%)}
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;
+        padding:34px 24px 90px}
+  h1{font-size:27px;font-weight:750;letter-spacing:-.02em;margin:0 0 6px}
+  h1 .accent{background:var(--grad);-webkit-background-clip:text;
+             background-clip:text;color:transparent}
+  h2{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0 0 12px}
+  h3{font-size:15.5px;font-weight:700;margin:0 0 8px}
+  .sub{color:var(--mut);font-size:13.5px;margin-bottom:18px}
+  /* hero stat strip */
+  .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 22px}
+  @media(max-width:900px){.hero{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:14px 16px;position:relative;overflow:hidden}
+  .stat::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+        background:var(--grad);opacity:.8}
+  .stat b{display:block;font-size:21px;font-weight:750;letter-spacing:-.02em;
+        font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--mut);line-height:1.4;display:block;
+        margin-top:2px}
+  /* cards */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+        padding:22px 24px;margin-bottom:20px;
+        transition:border-color .15s ease}
+  .card:hover{border-color:var(--line2)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:900px){.grid2{grid-template-columns:1fr}}
-  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
-        padding:2px 10px;border-radius:20px;vertical-align:2px;margin-left:8px}
-  .p-find{background:#12351c;color:var(--green);border:1px solid #1f6f35}
-  .p-fail{background:#3d1418;color:var(--red);border:1px solid #792e34}
-  .p-part{background:#3a2b12;color:var(--amber);border:1px solid #7a5a1e}
-  .p-run{background:#12283d;color:var(--blue);border:1px solid #1f4e79}
-  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
-  th,td{border:1px solid var(--line);padding:6px 10px;text-align:right}
+  .pill{display:inline-block;font-size:10.5px;font-weight:750;letter-spacing:.07em;
+        padding:2.5px 10px;border-radius:20px;vertical-align:2px;margin-left:8px;
+        text-transform:uppercase}
+  .p-find{background:rgba(65,196,99,.12);color:var(--green);
+          border:1px solid rgba(65,196,99,.35)}
+  .p-fail{background:rgba(246,97,81,.10);color:var(--red);
+          border:1px solid rgba(246,97,81,.35)}
+  .p-part{background:rgba(217,160,60,.12);color:var(--amber);
+          border:1px solid rgba(217,160,60,.35)}
+  .p-run{background:rgba(90,162,255,.10);color:var(--blue);
+         border:1px solid rgba(90,162,255,.35)}
+  /* tables */
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;
+        margin:12px 0;border:1px solid var(--line);border-radius:9px;
+        overflow:hidden;font-variant-numeric:tabular-nums}
+  th,td{padding:7px 11px;text-align:right;border-bottom:1px solid var(--line)}
   th:first-child,td:first-child{text-align:left}
-  th{background:var(--panel2);color:var(--mut);font-weight:600}
-  td.hi{color:var(--green);font-weight:700}
-  td.bad{color:var(--red)} td.gold{color:var(--gold);font-weight:700}
+  tr:last-child td{border-bottom:none}
+  th{background:var(--panel2);color:var(--mut);font-weight:650;font-size:12.5px;
+     letter-spacing:.02em}
+  tbody tr:nth-child(even) td, tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  td.hi{color:var(--green);font-weight:750}
+  td.bad{color:var(--red)} td.gold{color:var(--gold);font-weight:750}
   .mut{color:var(--mut)} .gold{color:var(--gold)} .green{color:var(--green)}
   .red{color:var(--red)} .blue{color:var(--blue)}
-  code,.mono{font-family:Consolas,monospace;font-size:13px}
-  code{background:var(--panel2);padding:1px 6px;border-radius:5px}
+  code,.mono{font-family:"Cascadia Code",Consolas,monospace;font-size:12.8px}
+  code{background:var(--panel2);border:1px solid var(--line);
+       padding:1px 6px;border-radius:5px}
   .math-block{background:var(--panel2);border:1px solid var(--line);
-              border-radius:8px;padding:10px 16px;margin:12px 0;overflow-x:auto}
-  .timeline{border-left:2px solid var(--line);margin-left:8px;padding-left:22px}
-  .tl-item{position:relative;margin-bottom:20px}
-  .tl-item::before{content:"";position:absolute;left:-29px;top:6px;width:12px;
-     height:12px;border-radius:50%;background:var(--mut)}
+              border-radius:9px;padding:11px 16px;margin:12px 0;overflow-x:auto}
+  /* timeline */
+  .timeline{border-left:2px solid var(--line);margin-left:8px;padding-left:24px}
+  .tl-item{position:relative;margin-bottom:22px}
+  .tl-item::before{content:"";position:absolute;left:-31px;top:5px;width:12px;
+     height:12px;border-radius:50%;background:var(--mut);
+     box-shadow:0 0 0 3px var(--bg)}
   .tl-item.find::before{background:var(--green)}
   .tl-item.fail::before{background:var(--red)}
   .tl-item.part::before{background:var(--amber)}
-  .tl-item.run::before{background:var(--blue);box-shadow:0 0 8px var(--blue)}
-  .anim-wrap{background:#0a0e14;border:1px solid var(--line);border-radius:10px;
+  .tl-item.run::before{background:var(--blue);box-shadow:0 0 0 3px var(--bg),
+     0 0 10px var(--blue)}
+  /* animation panel */
+  .anim-wrap{background:#080b12;border:1px solid var(--line);border-radius:12px;
              padding:14px}
-  canvas{width:100%;height:auto;display:block;border-radius:6px}
+  canvas{width:100%;height:auto;display:block;border-radius:8px}
   .anim-head{display:flex;justify-content:space-between;align-items:baseline;
              margin-bottom:6px}
   .btn{background:var(--panel2);color:var(--tx);border:1px solid var(--line);
-       border-radius:6px;padding:4px 14px;cursor:pointer;font-size:13px}
+       border-radius:7px;padding:4px 15px;cursor:pointer;font-size:13px;
+       transition:border-color .12s}
   .btn:hover{border-color:var(--blue)}
   .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);
-          margin-top:8px}
-  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;
+          margin-top:9px}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:3px;
       margin-right:5px;vertical-align:-1px}
   .note{border-left:3px solid var(--amber);background:var(--panel2);
-        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
-  .verdict{border-left:3px solid var(--red);background:#1d1114;
-        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
-  .ok{border-left:3px solid var(--green);background:#0f1a13;
-        padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
-  .tabs{display:flex;gap:8px;margin:0 0 24px}
-  .tab{background:var(--panel);border:1px solid var(--line);color:var(--mut);
-       border-radius:8px 8px 0 0;padding:8px 22px;cursor:pointer;font-size:14.5px;
-       font-weight:600;border-bottom:2px solid transparent}
-  .tab.active{color:var(--tx);border-bottom:2px solid var(--gold)}
+        padding:10px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  .verdict{border-left:3px solid var(--red);background:rgba(246,97,81,.06);
+        padding:10px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  .ok{border-left:3px solid var(--green);background:rgba(65,196,99,.06);
+        padding:10px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  /* sticky tabs */
+  .tabs{position:sticky;top:0;z-index:10;display:flex;gap:4px;margin:0 0 24px;
+        background:linear-gradient(var(--bg) 82%,transparent);
+        padding:10px 0 8px}
+  .tab{background:transparent;border:none;color:var(--mut);
+       padding:8px 18px;cursor:pointer;font-size:14.5px;font-weight:650;
+       border-radius:8px;position:relative;transition:color .12s}
+  .tab::after{content:"";position:absolute;left:16px;right:16px;bottom:2px;
+       height:2px;border-radius:2px;background:var(--grad);
+       transform:scaleX(0);transition:transform .18s ease}
+  .tab.active{color:var(--tx)} .tab.active::after{transform:scaleX(1)}
   .tab:hover{color:var(--tx)}
-  .fcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-         padding:20px 22px;margin-bottom:20px;border-top:3px solid var(--line)}
+  /* findings cards */
+  .fcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+         padding:22px 24px;margin-bottom:20px;border-top:3px solid var(--line);
+         transition:border-color .15s}
+  .fcard:hover{border-color:var(--line2)}
+  .card,.fcard{scroll-margin-top:64px}
   .fcard.primary{border-top-color:var(--gold)}
   .fcard.neg{border-top-color:var(--red)}
   .fcard.tool{border-top-color:var(--blue)}
-  .frow{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;font-size:14px;
+  .frow{display:grid;grid-template-columns:112px 1fr;gap:7px 16px;font-size:14px;
         margin-top:10px}
-  .frow dt{color:var(--mut);font-weight:600;text-align:right}
+  .frow dt{color:var(--mut);font-weight:650;text-align:right;font-size:13px;
+        letter-spacing:.02em}
   .frow dd{margin:0}
-  .conf{font-size:12px;letter-spacing:.05em;font-weight:700}
+  .conf{font-size:12px;letter-spacing:.05em;font-weight:750}
+  /* provenance cross-links */
+  .prov{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;padding-top:12px;
+        border-top:1px dashed var(--line)}
+  .prov-label{font-size:11px;color:var(--mut);letter-spacing:.08em;
+        text-transform:uppercase;font-weight:700;align-self:center}
+  .xref{display:inline-block;font-size:12px;font-weight:600;color:var(--blue);
+        background:rgba(90,162,255,.08);border:1px solid rgba(90,162,255,.25);
+        border-radius:6px;padding:2px 9px;text-decoration:none;cursor:pointer;
+        transition:background .12s,border-color .12s}
+  .xref:hover{background:rgba(90,162,255,.16);border-color:rgba(90,162,255,.5)}
+  .xref.file{color:var(--purple);background:rgba(183,138,255,.08);
+        border-color:rgba(183,138,255,.25)}
+  .xref.file:hover{background:rgba(183,138,255,.15)}
+  /* section flash on cross-link arrival */
+  .flash{animation:flash 1.6s ease}
+  @keyframes flash{0%{box-shadow:0 0 0 2px var(--blue)}100%{box-shadow:none}}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+        color:var(--mut);font-size:12.5px;display:flex;justify-content:space-between;
+        flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>Physics-Conforming Latent Twins &rarr; LLM Context Memory</h1>
+<h1>Physics-Conforming Latent Twins <span class="accent">&rarr;</span> LLM Context Memory</h1>
 <div class="sub">Research dashboard &middot; August 2026 &middot; based on Chung, Bu &amp; Verma,
-<i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; RTX 3060 Laptop 6&nbsp;GB</div>
+<i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; every experiment on one
+RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
+
+<div class="hero">
+  <div class="stat"><b class="green">+1.000</b><span>pinned ledger skill @ 16&times; the training
+  horizon &mdash; every seed (learned-decay baselines: &minus;6)</span></div>
+  <div class="stat"><b class="gold">89,222&times;</b><span>train-vs-test loss sensitivity gap in
+  the sub-critical decay region &mdash; the measured mechanism</span></div>
+  <div class="stat"><b>29/29</b><span>quantitative claims recomputed from raw logs by an
+  independent parser (<span class="mono">VERIFICATION.md</span>)</span></div>
+  <div class="stat"><b class="red">3</b><span>of our own hypotheses refuted by our own probes
+  &mdash; each replaced by a measured mechanism</span></div>
+</div>
 
 <div class="tabs">
   <button class="tab active" data-page="page-log">Research log</button>
@@ -103,7 +187,7 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
 
 <div id="page-log">
 <!-- ============================================================ IDEA -->
-<div class="card">
+<div class="card" id="sec-idea">
 <h2>1 &middot; The idea</h2>
 <p>The paper learns a surrogate solution operator for a physical system as
 <span class="blue">encode &rarr; evolve in latent space &rarr; decode</span>, with the latent
@@ -135,7 +219,7 @@ of nothing.</p>
 </div>
 
 <!-- ============================================================ ANIMATION -->
-<div class="card">
+<div class="card" id="sec-anim">
 <h2>2 &middot; Traditional context vs. structured latent memory</h2>
 <p class="mut" style="margin-top:-6px">A fact (<span class="gold">&#9632; gold</span>) arrives early
 in a long stream. Left: a sliding attention window — the fact eventually falls out and is gone.
@@ -160,7 +244,7 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 </div>
 
 <!-- ============================================================ TIMELINE -->
-<div class="card">
+<div class="card" id="sec-timeline">
 <h2>3 &middot; Experiment timeline &mdash; findings <i>and</i> failures</h2>
 <div class="timeline">
 
@@ -232,7 +316,7 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 </div>
 
 <!-- ============================================================ RESULTS -->
-<div class="card">
+<div class="card" id="sec-results">
 <h2>4 &middot; Results (real numbers, artifacts labeled)</h2>
 
 <h3>L0 original &mdash; relative ledger error, 3-seed mean (trained to t=64)</h3>
@@ -321,7 +405,7 @@ horizon (all protecting modes show content-late degradation), suggesting bounded
 </div>
 
 <!-- ============================================================ FAILURE LEDGER -->
-<div class="card">
+<div class="card" id="sec-failures">
 <h2>5 &middot; Failure ledger &mdash; the &epsilon; artifact, in full</h2>
 <p>The original code applied the decay floor <b>asymmetrically</b>:</p>
 <div class="math-block">
@@ -364,7 +448,7 @@ ones.</div>
 </div>
 
 <!-- ============================================================ SURVIVES -->
-<div class="card">
+<div class="card" id="sec-survives">
 <h2>6 &middot; What survives, honestly</h2>
 <ul>
 <li><b>The construction works as specified.</b> Exact subspace conservation under forcing, machine
@@ -410,10 +494,16 @@ first headline result. Findings are stated with the strongest caveat we know. St
 <h3>F1 &middot; Hard conservation substitutes for optimization pressure that short-horizon
 training cannot provide <span class="pill p-find" id="f1-pill">REPLICATING</span></h3>
 <dl class="frow">
-<dt>Claim</dt><dd>When a memory must retain an accumulated quantity far beyond its training
-horizon <i>and</i> forget aggressively to stay useful, gradient descent does not discover
-selective protection — even when the parameterization can represent it exactly. A hard
-architectural constraint \(C^\top W = 0\) provides it at zero optimization cost.</dd>
+<dt>Claim</dt><dd><b>(Third revision — narrowed by our own rescue suite.)</b> Learned decay at
+practitioner-standard initialization converges to a horizon-myopic attractor and under-retains
+catastrophically beyond the training horizon. <b>Soft fixes fail; removal fixes work:</b>
+explicit regularization toward zero decay loses the tug-of-war with the objective
+(skill &minus;4.0&nbsp;&plusmn;&nbsp;2.5), while <i>removing retention from the objective's
+reach</i> — by hard projection (\(C^\top W{=}0\), exact + auditable) or by freezing decay at
+zero (softplus init0; the parameterization gradient vanishes there) — restores full skill.
+What we can <b>not</b> claim: that hard structure uniquely wins — frozen-zero scalar decay
+matched pinned on the ledger and beat it on content on this task, because the task turned out
+not to require forgetting at all (see Caveats).</dd>
 <dt>Mechanism</dt><dd><b>Revised after the SNR probe refuted our first story.</b> We initially
 blamed a flat basin (no gradient signal below \(d\sim 1/K_{\text{train}}\)). Direct measurement
 says otherwise: gradient SNR across minibatches is 8&ndash;11 at <i>every</i> decay value — Adam
@@ -440,18 +530,48 @@ than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-cri
 <span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 8&ndash;11 at all
 decay values, gradient sign flips around \(d^\*\approx 7\times10^{-4}\), confirming an interior
 attractor of the training objective, which is where all 12 learned runs converged.
-<span class="mut">Rescue suite still running; its init0 arm now tests a sharp prediction: decay
-initialized at zero should drift back UP toward the attractor.</span></span></dd>
+<b>Rescue suite (done, 2 seeds/arm):</b></span>
+<table>
+<tr><th>arm</th><th>ledger skill @1024</th><th>content late</th><th>verdict</th></tr>
+<tr><td>diag baseline (init 10<sup>-3</sup>)</td><td class="bad">&minus;6.00 &plusmn; 0.02</td>
+<td class="bad">14.7</td><td>the attractor failure</td></tr>
+<tr><td>diag + regularizer &rarr; 0</td><td class="bad">&minus;3.99 &plusmn; 2.53</td>
+<td class="bad">25.7</td><td class="bad">soft fix fails, unstable</td></tr>
+<tr><td>diag + 3&times; training</td><td class="bad">&minus;1.09 &plusmn; 1.77</td>
+<td class="bad">11.3</td><td class="bad">not rescued by budget</td></tr>
+<tr><td>diag init0 (frozen zero)</td><td class="hi">+0.992</td><td>0.48</td>
+<td class="green">removal fix works</td></tr>
+<tr><td>scalar init0 (frozen zero)</td><td class="hi">+1.000</td><td class="hi">0.27</td>
+<td class="green"><b>best model overall</b></td></tr>
+<tr><td>pinned \(C^\top W{=}0\)</td><td class="hi">+1.000</td><td>0.69</td>
+<td class="green">exact + auditable</td></tr>
+</table>
+<span class="mut">Note my failed prediction, for the record: I predicted init0's decay would
+drift back up to the attractor. It did not — softplus's vanishing gradient at zero makes init0
+a de-facto freeze, i.e. a parameterization-level removal fix.</span></dd>
 <dt>Significance</dt><dd>It reframes what structure is <i>for</i>: not expressivity (the baselines
 could express the solution) but <b>reliability of optimization under train-short/test-long</b> —
 which is the universal regime of LLM memory (trained on 4–16k, deployed on 100k+). Concrete
 falsifiable prediction: learned-&lambda; latent memories (e.g. IndexMem's
 \(M\!\leftarrow\!\lambda M + \eta\sum\!\text{Lin}(k)\otimes v^\top\)) under-retain beyond their
 training length, and pinning a supervised subspace fixes it without retraining tricks.</dd>
-<dt>Caveats</dt><dd>Synthetic accumulation task (chosen because accumulation is what a ledger is
-for); n=3 seeds; one scale (\(n_z{=}8\)); the constraint helps only quantities you can name and
-supervise a flux for. L1 (real-LM `count` task) is the required next test.</dd>
+<dt>Caveats</dt><dd><b>The capacity-pressure premise failed empirically:</b> the task was
+designed so never-forgetting would fail on content via interference — it doesn't (frozen-zero
+decay has the <i>best</i> content). So this task cannot distinguish "protect selectively" from
+"never decay anything", and pinned's selective-forgetting advantage is <b>unsupported by current
+data</b> — a task where forgetting is provably necessary is now T1 priority #1. Also: synthetic
+accumulation family only; n=3 (n=10 running); one scale (\(n_z{=}8\)); the constraint helps only
+quantities you can name and supervise a flux for. Pinned's remaining unique value: machine-exact
+conservation, the auditable balance law, and guarantees no init trick provides.</dd>
 </dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-log','sec-results')">§4 frontier table</a>
+<a class="xref" onclick="return goto('page-log','sec-timeline')">§3 timeline</a>
+<a class="xref file" href="results/L0_frontier.txt" target="_blank">L0_frontier.txt</a>
+<a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt</a>
+<a class="xref file" href="l0_frontier.py" target="_blank">l0_frontier.py</a>
+</div>
 </div>
 
 <div class="fcard neg" id="f2">
@@ -472,6 +592,13 @@ directly applicable to published structured-memory results, most of which report
 <dt>Evidence</dt><dd><code>adv_probe/adv_recal/adv_floors.py</code> (committed), §5 of the
 research log, retraction in README.</dd>
 </dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-log','sec-failures')">§5 failure ledger</a>
+<a class="xref" onclick="return goto('page-log','sec-results')">§4 audit control table</a>
+<a class="xref file" href="adv_recal.py" target="_blank">adv_recal.py</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md</a>
+<a class="xref file" href="README.md" target="_blank">README retraction</a>
+</div>
 </div>
 
 <div class="fcard neg" id="f3">
@@ -487,6 +614,11 @@ random samples identifies the per-block flux function regardless of generator st
 labor: <b>the encoder determines what a supervised functional means; the generator determines
 whether it survives.</b> Useful design lens for any latent-memory system.</dd>
 </dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-log','sec-results')">§4 L0.5 table</a>
+<a class="xref file" href="results/L05_anchor.txt" target="_blank">L05_anchor.txt</a>
+<a class="xref file" href="l05_anchor.py" target="_blank">l05_anchor.py</a>
+</div>
 </div>
 
 <div class="fcard tool" id="f4">
@@ -506,6 +638,11 @@ by reasoning about them).</dd>
 (F3). Float32 drift at \(10^4\) steps is \(\sim\!10^{-2}\) — use float64 accumulators or
 renormalize if auditing at extreme horizons.</dd>
 </dl>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-log','sec-idea')">§1 construction + balance law</a>
+<a class="xref" onclick="return goto('page-log','sec-anim')">§2 animation</a>
+<a class="xref file" href="latent_twin_memory.py" target="_blank">latent_twin_memory.py (self-test)</a>
+</div>
 </div>
 
 <div class="fcard" id="f5">
@@ -525,6 +662,12 @@ functional is a strictly different (and cheaper) constraint than unitarity.</li>
 (Pad&eacute; scaling-and-squaring; observed 15&times; slowdowns). Bound the generator norm or use
 low-order integrators for the training loop.</li>
 </ul>
+<div class="prov"><span class="prov-label">Provenance</span>
+<a class="xref" onclick="return goto('page-log','sec-results')">§4 results</a>
+<a class="xref file" href="results/L0_frontier.txt" target="_blank">L0_frontier.txt</a>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt (rescue)</a>
+<a class="xref file" href="results_L0_seeds.txt" target="_blank">results_L0_seeds.txt</a>
+</div>
 </div>
 
 <div class="card">
@@ -577,17 +720,24 @@ gradient's <i>sign structure</i> revealed the true mechanism — an interior opt
 to. F1's mechanism row was rewritten from "no gradient signal" to "the objective actively
 selects an under-retaining decay". A refuted hypothesis with a better replacement — the probe
 did exactly its job.</dd>
-<dt>Rescue suite</dt><dd><code>l0_mechanism.py</code> Part B. The dangerous one is
-<code>diag&nbsp;init0</code>: initialize all decay at \(\sim\!0\) and train.
-<b>If it matches pinned on both axes, F1 collapses</b> to "initialize decay at zero" — a
-one-line practitioner fix and a different (smaller, still publishable) paper. The interesting
-sub-case: does its decay <i>drift back up</i> under the content loss's interference pressure?
-If yes, protection requires active maintenance, and the constraint story returns stronger.</dd>
+<dt>Rescue suite</dt><dd><span class="pill p-find">DONE</span> <code>l0_mechanism.py</code>
+Part B, full table in F1. The verdict split three ways: soft regularization toward zero decay
+<b>fails</b> (&minus;4.0 &plusmn; 2.5, unstable); 3&times; training does <b>not</b> rescue
+(&minus;1.1 &plusmn; 1.8); init-at-zero <b>rescues completely</b> (+0.99&ndash;1.00) because
+softplus's vanishing gradient at zero makes it a de-facto freeze — and my drift-back-up
+prediction was wrong. Frozen-zero scalar even beat pinned on content, exposing that this task
+never actually required forgetting (F1 caveats).</dd>
 <dt>Decision</dt><dd class="mono">
-SNR pass + rescue fails &rarr; F1 stands as stated &rarr; proceed to T1<br>
-SNR pass + init0 rescues &rarr; F1 &rarr; "init matters, structure optional" &rarr; T1 re-scoped<br>
-SNR fail &rarr; mechanism unknown &rarr; T1 item 3 (theory probe) becomes first priority</dd>
+Branch taken: SNR "fail" (better mechanism found: attractor, not flat basin)<br>
++ removal-fixes rescue &rarr; claim narrowed to "retention must be non-tradeable"<br>
+&rarr; T1 priority #1 becomes: a task where forgetting is PROVABLY necessary</dd>
 </dl>
+<div class="prov"><span class="prov-label">Links</span>
+<a class="xref" onclick="return goto('page-findings','f1')">Finding F1</a>
+<a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt</a>
+<a class="xref file" href="l0_snr.py" target="_blank">l0_snr.py</a>
+</div>
 </div>
 
 <div class="card">
@@ -616,6 +766,13 @@ if pinned shows no advantage over learned-decay baselines on real representation
 flat-basin conditions present (train 4k, test 32k tokens), the memory branch ends here</b> and T2
 items 2–3 are cancelled in favor of T3.</li>
 </ol>
+<div class="prov"><span class="prov-label">Links</span>
+<a class="xref" onclick="return goto('page-findings','f1')">F1 (scope caveats)</a>
+<a class="xref" onclick="return goto('page-findings','f5')">F5 (bounded encodings)</a>
+<a class="xref file" href="data/haystack.py" target="_blank">data/haystack.py</a>
+<a class="xref file" href="precompute_states.py" target="_blank">precompute_states.py</a>
+<a class="xref file" href="l0_stats.py" target="_blank">l0_stats.py (n=10, running)</a>
+</div>
 </div>
 
 <div class="card">
@@ -653,6 +810,12 @@ we say so and the paper becomes about the trick.</td></tr>
 shared cache (login nodes often lack egress); test <code>scripts/setup.sh</code> in an
 interactive session; budget: all of T2 &asymp; <b>460&ndash;610 GPU-h</b> — a modest single
 allocation request.</p>
+<div class="prov"><span class="prov-label">Links</span>
+<a class="xref" onclick="return goto('page-findings','f1')">F1 (the prediction being scaled)</a>
+<a class="xref file" href="scripts/job.sbatch" target="_blank">scripts/job.sbatch</a>
+<a class="xref file" href="scripts/setup.sh" target="_blank">scripts/setup.sh</a>
+<a class="xref file" href="BRIEF.md" target="_blank">BRIEF.md (compute ask)</a>
+</div>
 </div>
 
 <div class="card">
@@ -672,6 +835,11 @@ with a testable constant. Zero GPU. Makes the paper's core claim architecture-in
 as an online staleness alarm — prototype on L1 states; if it flags exactly the samples where
 retrieval fails, that is a practical contribution independent of the retention race.</li>
 </ol>
+<div class="prov"><span class="prov-label">Links</span>
+<a class="xref" onclick="return goto('page-findings','f4')">F4 (the machinery this builds on)</a>
+<a class="xref" onclick="return goto('page-log','sec-idea')">§1 balance law</a>
+<a class="xref file" href="PLAN.md" target="_blank">PLAN.md (original L3 design)</a>
+</div>
 </div>
 
 <div class="card">
@@ -697,19 +865,31 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 
 </div><!-- /page-roadmap -->
 
+<footer>
+  <span>Latent Twin Memory &middot; independent research project &middot; Aug 2026</span>
+  <span>29/29 claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
+  full provenance in git history &middot; single RTX 3060 (6 GB)</span>
+</footer>
+
 <script>
-/* tab switching (N pages) */
-document.querySelectorAll('.tab').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    ['page-log','page-findings','page-roadmap'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.hidden = b.dataset.page!==id;
-    });
-    window.scrollTo(0,0);
-  };
-});
+/* tab switching + cross-tab anchor navigation */
+function goto(page, anchor){
+  document.querySelectorAll('.tab').forEach(x=>
+    x.classList.toggle('active', x.dataset.page===page));
+  ['page-log','page-findings','page-roadmap'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.hidden = id!==page;
+  });
+  if(anchor){
+    const t=document.getElementById(anchor);
+    if(t){
+      t.scrollIntoView({behavior:'smooth',block:'start'});
+      t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash');
+    }
+  } else { window.scrollTo({top:0}); }
+  return false;
+}
+document.querySelectorAll('.tab').forEach(b=>{ b.onclick=()=>goto(b.dataset.page); });
 </script>
 
 <script>

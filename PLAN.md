@@ -1,5 +1,12 @@
 # Latent Twins → LLM context memory: test plan
 
+> **SUPERSEDED in part (Aug 2026):** the live plan is the Roadmap tab of
+> `dashboard.html`. Post-rescue-suite priority #1 is a task where forgetting is
+> *provably* necessary (verify empirically that d=0 hurts content there), since
+> the frontier task failed to instantiate that tradeoff — frozen-zero decay
+> matched pinned on both axes. This file is kept for the original L0–L3 ladder
+> and kill criteria.
+
 Reference: Chung, Bu & Verma (2026), *Physics-Conforming Latent Twins*, arXiv:2606.15053v2.
 
 ## The claim under test

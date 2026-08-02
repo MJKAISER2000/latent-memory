@@ -45,3 +45,17 @@ PART B -- BASELINE RESCUE  (a rescue counts only if it wins BOTH columns)
     diag  baseline |    -6.000 +-0.018  |   14.716 +-14.36 |    7.95e-04 |   0.56
     diag     init0 |    +0.992 +-0.007  |    0.479 +-0.21 |    2.06e-09 |   0.36
     diag       reg |    -3.991 +-2.534  |   25.749 +-25.33 |    5.71e-05 |   0.01
+    diag      long |    -1.086 +-1.770  |   11.282 +-10.68 |    4.74e-04 |   0.65
+  scalar     init0 |    +1.000 +-0.000  |    0.266 +-0.00 |    2.09e-09 |   0.37
+  pinned  baseline |    +1.000 +-0.000  |    0.685 +-0.03 |   -1.00e-07 |   1.00
+----------------------------------------------------------------------------------------
+
+INTERPRETATION
+  diag init0 vs diag baseline : ledger -6.00 -> +0.99
+  diag init0 vs pinned        : ledger +0.99 vs +1.00, content 0.479 vs 0.685
+
+  If diag-init0 matches pinned on BOTH columns, F1 weakens to "initialise the
+  decay at zero" -- a one-line fix, not an argument for hard structure.
+  If diag-init0 recovers the ledger but drifts its decay back up or loses
+  content, the flat basin is real and the constraint is doing work SGD will
+  not do on its own.
