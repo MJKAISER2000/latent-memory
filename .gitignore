@@ -1,6 +1,14 @@
+# environments / caches
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# heavy generated artifacts (regenerate via data/haystack.py + precompute_states.py)
 cache/
 data/*.jsonl
 logs/
+
+# OS noise
+.DS_Store
+Thumbs.db
