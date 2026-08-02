@@ -70,6 +70,22 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
         padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
   .ok{border-left:3px solid var(--green);background:#0f1a13;
         padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+  .tabs{display:flex;gap:8px;margin:0 0 24px}
+  .tab{background:var(--panel);border:1px solid var(--line);color:var(--mut);
+       border-radius:8px 8px 0 0;padding:8px 22px;cursor:pointer;font-size:14.5px;
+       font-weight:600;border-bottom:2px solid transparent}
+  .tab.active{color:var(--tx);border-bottom:2px solid var(--gold)}
+  .tab:hover{color:var(--tx)}
+  .fcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+         padding:20px 22px;margin-bottom:20px;border-top:3px solid var(--line)}
+  .fcard.primary{border-top-color:var(--gold)}
+  .fcard.neg{border-top-color:var(--red)}
+  .fcard.tool{border-top-color:var(--blue)}
+  .frow{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;font-size:14px;
+        margin-top:10px}
+  .frow dt{color:var(--mut);font-weight:600;text-align:right}
+  .frow dd{margin:0}
+  .conf{font-size:12px;letter-spacing:.05em;font-weight:700}
 </style>
 </head>
 <body>
@@ -79,6 +95,12 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
 <div class="sub">Research dashboard &middot; August 2026 &middot; based on Chung, Bu &amp; Verma,
 <i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; RTX 3060 Laptop 6&nbsp;GB</div>
 
+<div class="tabs">
+  <button class="tab active" data-page="page-log">Research log</button>
+  <button class="tab" data-page="page-findings">Findings</button>
+</div>
+
+<div id="page-log">
 <!-- ============================================================ IDEA -->
 <div class="card">
 <h2>1 &middot; The idea</h2>
@@ -190,7 +212,7 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 
 <div class="tl-item find">
   <h3>L0-Frontier &mdash; the corrected experiment
-  <span class="pill p-find" id="frontier-pill">FINDING (seed 0; replication running)</span></h3>
+  <span class="pill p-find" id="frontier-pill">REPLICATED 3/3 SEEDS</span></h3>
   Under <b>capacity pressure</b>, where forgetting is necessary but ledger retention forbids it on
   one direction, and with every audit fix applied: <b>gradient descent does not discover selective
   protection even when the parameterization can represent it.</b> Learned decay parks in the
@@ -249,26 +271,32 @@ construction.</p>
 The pinned-vs-dissipative gap in this table is the &epsilon; artifact again.</p>
 
 <h3 id="frontier-h3">L0-Frontier &mdash; the corrected experiment
-<span class="pill p-part" id="frontier-pill2">SEED 0 &middot; 2 MORE RUNNING</span></h3>
+<span class="pill p-find" id="frontier-pill2">REPLICATED 3/3 SEEDS</span></h3>
 <div id="frontier-results">
 <p>All audit fixes applied: <b>learned</b> decay everywhere (softplus, identical init, no floors),
 matched parameterizations, identical affine readouts \( \hat M = \gamma\,\langle r, z\rangle + b\),
 gated deposits \(a_k=\text{flag}_k\cdot\text{amount}_k\), per-sample rate jitter, and capacity
 pressure (\(n_z{=}8\), \(d_{\text{in}}{=}32\), content reconstruction at the test horizon).
-Trained at \(K{=}64\), evaluated at \(t{=}1024\):</p>
+Trained at \(K{=}64\), evaluated at \(t{=}1024\). <b>Three seeds, mean&nbsp;&plusmn;&nbsp;std:</b></p>
 <table>
 <tr><th>mode</th><th>can it protect?</th><th>ledger skill @1024</th>
 <th>content MSE late</th><th>slowest decay</th><th>align w/ readout</th></tr>
 <tr><td>scalar (IndexMem-style learned &lambda;)</td><td class="mut">no — uniform</td>
-<td class="bad">&minus;6.65</td><td>0.317</td><td>7.8&times;10<sup>-4</sup></td><td>0.64</td></tr>
-<tr><td>diag (Mamba-style per-dim learned decay)</td><td class="mut">yes — didn't find it</td>
-<td class="bad">&minus;5.98</td><td>0.356</td><td>7.2&times;10<sup>-4</sup></td><td>0.64</td></tr>
-<tr><td>ks (full K+S, soft)</td><td class="mut">yes — <i>approximately</i> found it</td>
-<td>+0.49</td><td class="bad">1.261</td><td>6.7&times;10<sup>-4</sup></td><td>0.98</td></tr>
+<td class="bad">&minus;6.54 &plusmn; 0.21</td><td class="bad">5.45 &plusmn; 5.4</td>
+<td>8.6&times;10<sup>-4</sup></td><td>0.01&ndash;0.64</td></tr>
+<tr><td>diag (Mamba-style per-dim learned decay)</td><td class="mut">yes — 0/3 found it</td>
+<td class="bad">&minus;6.12 &plusmn; 0.18</td><td class="bad">13.2 &plusmn; 12</td>
+<td>8.1&times;10<sup>-4</sup></td><td>0.48&ndash;0.81</td></tr>
+<tr><td>ks (full K+S, soft)</td><td class="mut">finds the <i>direction</i> 3/3, never holds the gain</td>
+<td>+0.25 &plusmn; 0.17</td><td>1.01 &plusmn; 0.35</td>
+<td>7.2&times;10<sup>-4</sup></td><td>0.89&ndash;0.98</td></tr>
 <tr><td>pinned (hard \(C^\top W{=}0\))</td><td class="green">by construction</td>
-<td class="hi">+1.00</td><td class="hi">0.714</td><td class="gold">0 (exact)</td>
-<td class="gold">1.00</td></tr>
+<td class="hi">+1.000 &plusmn; 0.000</td><td class="hi">0.62 &plusmn; 0.10</td>
+<td class="gold">0 (exact)</td><td class="gold">1.00</td></tr>
 </table>
+<p class="mut">The learned decays parked at 7.2&ndash;9.0&times;10<sup>-4</sup> from init
+10<sup>-3</sup> — across every mode and seed, they barely moved. That tight clustering at the
+init is itself the flat-basin signature (see the mechanism probe below).</p>
 <p><b>The gradient across modes is the finding.</b> Learned decay parks in a flat basin: any rate
 below \(\sim 1/K_{\text{train}}\) is invisible during training
 (\(e^{-7.8\times10^{-4}\cdot 64}\!\approx\!0.95\)) yet fatal at test
@@ -339,12 +367,14 @@ precision, verified. An <i>auditable</i> memory — the balance law \(C^\top z_t
 C^\top g_k\) is checkable online, and its defect is a principled staleness detector.</li>
 <li><b>A validated audit methodology</b> for structured-memory claims (arguably the most
 transferable artifact of the project so far).</li>
-<li><b>The frontier finding (seed 0, replication in flight):</b> learned decay <i>can</i>
-represent selective protection but SGD does not <i>find</i> it under train-short/test-long — the
-flat basin below \(d\sim 1/K_{\text{train}}\) gives no gradient signal. The hard constraint buys
-<b>optimization reliability, not expressivity</b>. If it replicates, this is the defensible core
-claim, and it makes a concrete prediction for real systems: IndexMem-style learned-&lambda;
-memories should under-retain at horizons beyond their training length, fixably by pinning.</li>
+<li><b>The frontier finding (replicated 3/3 seeds):</b> learned decay <i>can</i>
+represent selective protection but gradient training does not <i>find</i> it under
+train-short/test-long — the flat basin below \(d\sim 1/K_{\text{train}}\) leaves the decay
+parameter at its init (measured: 7.2&ndash;9.0&times;10<sup>-4</sup> from 10<sup>-3</sup>, every
+mode, every seed). The hard constraint buys <b>optimization reliability, not expressivity</b>.
+Concrete prediction for real systems: IndexMem-style learned-&lambda; memories should
+under-retain at horizons beyond their training length, fixably by pinning. Baseline-rescue
+attempts (the honest falsification path) are running now.</li>
 <li><b>The L1/L2 assets are built and unblocked</b>: haystack corpus with per-block durability
 labels (retrieve / update / count — count's answer appears nowhere in the context), frozen-LM
 block-state precompute, SLURM scripts for the university cluster.</li>
@@ -356,7 +386,160 @@ construction + balance-law framing for LLM memory remains unclaimed territory as
 but it must first be shown to beat matched learned baselines, which it has not yet been.</p>
 </div>
 
+</div><!-- /page-log -->
+
+<!-- ============================================================ FINDINGS PAGE -->
+<div id="page-findings" hidden>
+
+<div class="card" style="border-left:3px solid var(--gold)">
+<h2>Findings</h2>
+<p>Everything below survived (or emerged from) an adversarial audit that killed the project's own
+first headline result. Findings are stated with the strongest caveat we know. Status pills:
+<span class="pill p-find">REPLICATING</span> = holding across seeds in flight,
+<span class="pill p-fail">NEGATIVE</span> = something we disproved (ours or implied elsewhere),
+<span class="pill p-part">OBSERVATION</span> = real but scoped.</p>
 </div>
+
+<div class="fcard primary" id="f1">
+<h3>F1 &middot; Hard conservation substitutes for optimization pressure that short-horizon
+training cannot provide <span class="pill p-find" id="f1-pill">REPLICATING</span></h3>
+<dl class="frow">
+<dt>Claim</dt><dd>When a memory must retain an accumulated quantity far beyond its training
+horizon <i>and</i> forget aggressively to stay useful, gradient descent does not discover
+selective protection — even when the parameterization can represent it exactly. A hard
+architectural constraint \(C^\top W = 0\) provides it at zero optimization cost.</dd>
+<dt>Mechanism</dt><dd>Every decay rate \(d \lesssim 1/K_{\text{train}}\) is a flat basin of the
+training loss: \(e^{-d\,K_{\text{train}}}\approx 1\) makes rates below the training horizon
+indistinguishable, so SGD parks at whatever the init gave it (measured: \(d\approx
+7{-}9\times10^{-4}\) from init \(10^{-3}\), across all seeds and modes). At test horizon
+\(K_{\text{test}}=16\,K_{\text{train}}\) that residual is fatal:
+\(e^{-d\,K_{\text{test}}}\approx 0.45\).</dd>
+<dt>Evidence</dt><dd id="f1-evidence">Frontier experiment, matched learned baselines, all audit
+fixes, <b>3/3 seeds</b>: scalar skill &minus;6.54&plusmn;0.21; diag &minus;6.12&plusmn;0.18 (0/3
+seeds zero a direction); soft K+S finds the direction every seed (align 0.89&ndash;0.98) but keeps
+a \(\sim\!7{\times}10^{-4}\) leak, skill +0.25&plusmn;0.17; <b>pinned +1.000&plusmn;0.000</b> with
+exact zero decay and the best, most stable content (0.62&plusmn;0.10). Every learned decay parked
+at 7.2&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
+sub-critical region \(dK_{\text{train}}\!<\!0.1\), \(L_{\text{train}}\) varies 6,365&times; less
+than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-critical.
+<span class="mut" id="f1-snr">Adam-correct SNR probe + baseline-rescue suite (init-at-zero,
+explicit decay regularizer, 3&times; training) in flight — results will finalize or revise this
+card.</span></dd>
+<dt>Significance</dt><dd>It reframes what structure is <i>for</i>: not expressivity (the baselines
+could express the solution) but <b>reliability of optimization under train-short/test-long</b> —
+which is the universal regime of LLM memory (trained on 4–16k, deployed on 100k+). Concrete
+falsifiable prediction: learned-&lambda; latent memories (e.g. IndexMem's
+\(M\!\leftarrow\!\lambda M + \eta\sum\!\text{Lin}(k)\otimes v^\top\)) under-retain beyond their
+training length, and pinning a supervised subspace fixes it without retraining tricks.</dd>
+<dt>Caveats</dt><dd>Synthetic accumulation task (chosen because accumulation is what a ledger is
+for); n=3 seeds; one scale (\(n_z{=}8\)); the constraint helps only quantities you can name and
+supervise a flux for. L1 (real-LM `count` task) is the required next test.</dd>
+</dl>
+</div>
+
+<div class="fcard neg" id="f2">
+<h3>F2 &middot; Our own headline result was an artifact — and the audit protocol that caught it
+transfers <span class="pill p-fail">NEGATIVE + METHOD</span></h3>
+<dl class="frow">
+<dt>Claim</dt><dd>The original "pinned is 12.7&ndash;29&times; better at 16&times; extrapolation"
+was manufactured by a fixed decay floor applied asymmetrically (\(-\varepsilon I\) for the
+baseline, \(-\varepsilon P\) for the method) with \(\varepsilon K_{\text{test}} = 1.024\) — the
+baseline was scripted to fail at exactly the measured horizon. One-variable control
+(\(\varepsilon{=}0\)): advantage 1.00&times;, identical correlation 0.9878.</dd>
+<dt>Significance</dt><dd>The failure pattern generalizes: <i>hard-constrain the property your
+metric measures, exempt your method from a leak the baseline carries, and extrapolation plots look
+magnificent.</i> The audit checklist that caught it — one-variable controls, oracle affine
+recalibration on held-out data, no-input floor, Bayes-floor comparison, live-parameter counts,
+timescale collision checks (\(\varepsilon t\), rotation periods, \(1/K_{\text{train}}\)) — is
+directly applicable to published structured-memory results, most of which report none of these.</dd>
+<dt>Evidence</dt><dd><code>adv_probe/adv_recal/adv_floors.py</code> (committed), §5 of the
+research log, retraction in README.</dd>
+</dl>
+</div>
+
+<div class="fcard neg" id="f3">
+<h3>F3 &middot; Anchor transport is encoder-borne, not conservation-borne
+<span class="pill p-fail">FALSIFIED HYPOTHESIS</span></h3>
+<dl class="frow">
+<dt>Claim</dt><dd>We predicted the balance law would let one supervised horizon pin all horizons
+("structure converts sparse supervision into dense supervision"). False: sparse&nbsp;&asymp;&nbsp;dense
+for <b>every</b> generator mode (interior errors 0.164/0.145/0.143 across modes; 18 configs,
+3 seeds). The transport mechanism is the position-shared encoder: one summed constraint over many
+random samples identifies the per-block flux function regardless of generator structure.</dd>
+<dt>Significance</dt><dd>Kills a seductive story we almost built on, and clarifies the division of
+labor: <b>the encoder determines what a supervised functional means; the generator determines
+whether it survives.</b> Useful design lens for any latent-memory system.</dd>
+</dl>
+</div>
+
+<div class="fcard tool" id="f4">
+<h3>F4 &middot; A driven memory with an exact, auditable balance law
+<span class="pill p-find">VERIFIED MACHINERY</span></h3>
+<dl class="frow">
+<dt>Claim</dt><dd>Under forcing, the pinned construction upgrades conservation to
+\(C^\top z_t = C^\top z_s + \sum_k C^\top g_k\) — exact to \(3.2\times10^{-13}\) (float64) over
+driven rollouts, with no loss term. The memory's protected content changes <i>only</i> by
+explicit, logged fluxes.</dd>
+<dt>Significance</dt><dd>An accounting property no attention window or learned-decay memory has:
+the ledger is <b>auditable online</b>, and the compatibility defect \(|\mathcal C(d(z)) -
+\mathcal C_Z(z)|\) doubles as a staleness/OOD alarm. This is the piece that transfers directly to
+the physics branch (a context-resident latent scratchpad whose invariants the LLM cannot corrupt
+by reasoning about them).</dd>
+<dt>Caveats</dt><dd>Exactness is in latent space; meaning still depends on the learned flux
+(F3). Float32 drift at \(10^4\) steps is \(\sim\!10^{-2}\) — use float64 accumulators or
+renormalize if auditing at extreme horizons.</dd>
+</dl>
+</div>
+
+<div class="fcard" id="f5">
+<h3>F5 &middot; Scoped engineering observations <span class="pill p-part">OBSERVATION</span></h3>
+<ul style="margin:8px 0 0">
+<li><b>Unbounded accumulators drift out of the decoder's range.</b> Every protecting mode shows
+late-horizon content degradation because \(C^\top z\) grows past anything seen in training.
+Design consequence for L1: pin <i>bounded</i> encodings (means/rates, not raw sums), or condition
+the decoder on horizon.</li>
+<li><b>Pure rotation is an initialization lottery.</b> Skew-only generators put the readout on a
+rotation of period \(\sim\!2\pi/|\lambda|\); whether that survives to the test horizon is luck
+(observed spread 0.04&ndash;0.86 rel. err across seeds at fixed hyperparameters).</li>
+<li><b>Norm preservation \(\ne\) functional preservation.</b> Orthogonal/unitary transitions
+conserve \(\|z\|\) while freely rotating any particular readout into oblivion — pinning a named
+functional is a strictly different (and cheaper) constraint than unitarity.</li>
+<li><b><code>torch.matrix_exp</code> cost explodes as \(\|W\|\) grows</b> during training
+(Pad&eacute; scaling-and-squaring; observed 15&times; slowdowns). Bound the generator norm or use
+low-order integrators for the training loop.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>What would make F1 a publishable result</h3>
+<ol style="margin:8px 0 0">
+<li><b>L1-count on real LM states</b>: the haystack `count` task (answer appears nowhere in
+context) through frozen-LM block states — does the flat-basin effect survive real
+representations? Assets are built; needs ~1 GPU-day.</li>
+<li><b>IndexMem head-to-head</b>: swap its scalar \(\lambda\) for a pinned generator, RULER/NIAH
+beyond training length. This is the "few points on a real system" version.</li>
+<li><b>10+ seeds, paired tests, and an \(\varepsilon\)-sweep</b> for the frontier (the audit's
+standing demand — n=3 has a significance floor of p=0.125).</li>
+<li><b>Baseline-rescue attempts</b>: decay-rate weight decay toward zero, log-space decay
+parameterization, longer training — if any trivially fixes the flat basin, F1 shrinks to an
+init-sensitivity footnote. This must be tried <i>before</i> claiming novelty.</li>
+</ol>
+</div>
+
+</div><!-- /page-findings -->
+
+<script>
+/* tab switching */
+document.querySelectorAll('.tab').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('page-log').hidden = b.dataset.page!=='page-log';
+    document.getElementById('page-findings').hidden = b.dataset.page!=='page-findings';
+    window.scrollTo(0,0);
+  };
+});
+</script>
 
 <script>
 /* ================= animation: traditional context vs latent twin ============ */
