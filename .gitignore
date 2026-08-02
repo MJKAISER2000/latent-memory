@@ -12,3 +12,7 @@ logs/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# personal / outreach docs stay local
+BRIEF.md
+EMAIL_DRAFT.md
