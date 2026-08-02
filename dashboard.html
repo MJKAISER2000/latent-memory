@@ -159,6 +159,12 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
   footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
         color:var(--mut);font-size:12.5px;display:flex;justify-content:space-between;
         flex-wrap:wrap;gap:8px}
+  /* figures */
+  .fig{margin:0 0 6px;background:var(--panel2);border:1px solid var(--line);
+       border-radius:10px;padding:12px 14px 10px}
+  .fig-plot svg{width:100%;height:auto;display:block}
+  figcaption{font-size:12.8px;color:var(--mut);line-height:1.55;margin-top:8px}
+  figcaption b{color:var(--tx)}
 </style>
 </head>
 <body>
@@ -472,6 +478,63 @@ interactive precisely because it shows how convincing a rigged race looks.</p>
 <a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
 <a class="xref file" href="results_L0_seeds.txt" target="_blank">results_L0_seeds.txt</a>
 <a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md</a>
+</div>
+</div>
+
+<!-- ============================================================ FIGURES -->
+<div class="card" id="sec-figures">
+<h2>4.6 &middot; Figures</h2>
+<p class="mut" style="margin-top:-6px">Every figure is rendered from the same verified data
+arrays as the sliders above — inline SVG, no chart library, view-source friendly.</p>
+
+<div class="grid2">
+<figure class="fig" id="fig1">
+  <div class="fig-plot"></div>
+  <figcaption><b>Fig. 1 — The n=10 verdict.</b> <span id="fig1-cap">Per-seed ledger skill at
+  16&times; the training horizon, 10 seeds per arm. <span class="mut">(populates when the
+  statistics run completes — see LIVE strip)</span></span></figcaption>
+</figure>
+<figure class="fig" id="fig2">
+  <div class="fig-plot"></div>
+  <figcaption><b>Fig. 2 — The horizon-myopic attractor.</b> Training loss (gold, log scale) has
+  an interior minimum at \(d^\*\!=\!9.7\times10^{-4}\) — exactly where SGD converged (marker) —
+  while test loss at 16&times; the horizon (blue, right axis) wants the decay pushed further
+  down. The two objectives disagree, and training follows the one it can see.
+  <span class="mut">Landscape scan of a trained model; conditional slice, everything but \(d\)
+  frozen.</span></figcaption>
+</figure>
+<figure class="fig" id="fig3">
+  <div class="fig-plot"></div>
+  <figcaption><b>Fig. 3 — Training <i>actively</i> selects the attractor.</b> Signed mean
+  training gradient across 64 minibatches (bar height: log scale). Gold bars push the decay
+  <i>up</i> toward \(d^\*\); blue bars push it back <i>down</i>. SNR is 8&ndash;11 throughout —
+  Adam sees this parameter clearly and chooses the under-retaining rate. This refuted our own
+  earlier "flat basin" hypothesis.</figcaption>
+</figure>
+<figure class="fig" id="fig4">
+  <div class="fig-plot"></div>
+  <figcaption><b>Fig. 4 — How convincing a rigged race looks.</b> Relative ledger error vs
+  horizon (3-seed means, log&ndash;log). The baseline divergence that launched our retracted
+  29&times; claim: the fixed-&epsilon; baselines end up <i>worse than ignoring the input</i>
+  (gray dashed), while pinned improves with horizon. Kept because the shape of the artifact is
+  the lesson — see <a class="xref" style="font-size:11px"
+  onclick="return goto('page-log','sec-failures')">§5</a>.</figcaption>
+</figure>
+</div>
+<figure class="fig" id="fig5">
+  <div class="fig-plot"></div>
+  <figcaption><b>Fig. 5 — Soft fixes fail; removal fixes work.</b> Ledger skill by rescue arm
+  (2 seeds each). Regularizing the decay toward zero loses the tug-of-war with the attractor
+  (&minus;4.0, unstable); tripled training budget does not escape it; freezing the decay at zero
+  (init0) or projecting it out (\(C^\top W{=}0\)) restores full skill. Retention must be made
+  <i>non-tradeable</i> — pressure is not enough.</figcaption>
+</figure>
+
+<div class="prov"><span class="prov-label">Data</span>
+<a class="xref file" href="results/L0_stats.txt" target="_blank">L0_stats.txt</a>
+<a class="xref file" href="results/L0_mechanism.txt" target="_blank">L0_mechanism.txt</a>
+<a class="xref file" href="results/L0_snr.txt" target="_blank">L0_snr.txt</a>
+<a class="xref file" href="results_L0_seeds.txt" target="_blank">results_L0_seeds.txt</a>
 </div>
 </div>
 
@@ -1093,22 +1156,39 @@ setInterval(()=>{                       // re-inject live.js (cache-busted)
 </script>
 
 <script>
+/* ============ shared logged data (single source for sliders + figures) ====== */
+window.RDATA = {
+  /* landscape scan, results/L0_mechanism.txt (22 points, verbatim) */
+  D:[1.00e-6,1.87e-6,3.49e-6,6.52e-6,1.22e-5,2.28e-5,4.25e-5,7.94e-5,1.48e-4,
+     2.77e-4,5.18e-4,9.68e-4,1.81e-3,3.38e-3,6.31e-3,1.18e-2,2.20e-2,4.11e-2,
+     7.69e-2,1.44e-1,2.68e-1,5.01e-1],
+  LTR:[0.0224,0.0224,0.0223,0.0222,0.0219,0.0214,0.0206,0.0190,0.0163,0.0118,
+       0.0055,0.0011,0.0167,0.1213,0.5334,1.8214,5.0442,11.0775,18.8530,
+       25.6593,30.1938,32.8460],
+  LTE:[8407.6,8404.8,8399.7,8390.5,8372.6,8340.2,8280.3,8171.5,7979.5,7655.9,
+       7157.0,6506.7,5901.2,5726.7,6250.9,7198.2,8033.8,8568.2,8870.2,9034.1,
+       9122.0,9168.7],
+  /* SNR probe, results/L0_snr.txt: signed mean gradient dL/ds + SNR */
+  SD:[1e-5,3.16e-5,1e-4,3.16e-4,1e-3,3.16e-3,1e-2,3.16e-2,1e-1,3.16e-1],
+  SMU:[-4.54e-4,-1.40e-3,-4.15e-3,-9.60e-3,1.36e-3,0.284,2.60,10.08,11.04,4.20],
+  SNR:[10.42,10.49,11.06,9.15,1.31,8.13,10.41,9.09,9.71,11.23],
+  /* L0 horizon sweep, results_L0_seeds.txt (3-seed means) + analytic constant */
+  T:[64,128,256,512,1024],
+  HOR:{dissipative:[0.0720,0.0528,0.0838,0.1814,0.3447],
+       conservative:[0.0748,0.0515,0.0513,0.1476,0.4676],
+       pinned:[0.0732,0.0538,0.0413,0.0317,0.0270],
+       constant:[0.2801,0.1981,0.1401,0.0990,0.0700]},
+  /* rescue suite, results/L0_mechanism.txt Part B (2 seeds/arm) */
+  RESCUE:[["diag baseline",-6.000,14.716],["diag +regularizer",-3.991,25.749],
+          ["diag 3x training",-1.086,11.282],["diag init0 (frozen)",0.992,0.479],
+          ["scalar init0 (frozen)",1.000,0.266],["pinned CᵀW=0",1.000,0.685]],
+  /* n=10 stats: filled in when the run completes */
+  STATS:null,
+};
+
 /* ============ hands-on sliders: actual logged data, nothing simulated ======= */
 (function(){
-/* Widget A: landscape scan, results/L0_mechanism.txt (22 points, verbatim) */
-const D=[1.00e-6,1.87e-6,3.49e-6,6.52e-6,1.22e-5,2.28e-5,4.25e-5,7.94e-5,1.48e-4,
-         2.77e-4,5.18e-4,9.68e-4,1.81e-3,3.38e-3,6.31e-3,1.18e-2,2.20e-2,4.11e-2,
-         7.69e-2,1.44e-1,2.68e-1,5.01e-1];
-const LTR=[0.0224,0.0224,0.0223,0.0222,0.0219,0.0214,0.0206,0.0190,0.0163,0.0118,
-           0.0055,0.0011,0.0167,0.1213,0.5334,1.8214,5.0442,11.0775,18.8530,
-           25.6593,30.1938,32.8460];
-const LTE=[8407.6,8404.8,8399.7,8390.5,8372.6,8340.2,8280.3,8171.5,7979.5,7655.9,
-           7157.0,6506.7,5901.2,5726.7,6250.9,7198.2,8033.8,8568.2,8870.2,9034.1,
-           9122.0,9168.7];
-/* SNR probe, results/L0_snr.txt: signed mean gradient dL/ds + SNR (10 points) */
-const SD=[1e-5,3.16e-5,1e-4,3.16e-4,1e-3,3.16e-3,1e-2,3.16e-2,1e-1,3.16e-1];
-const SMU=[-4.54e-4,-1.40e-3,-4.15e-3,-9.60e-3,1.36e-3,0.284,2.60,10.08,11.04,4.20];
-const SNR=[10.42,10.49,11.06,9.15,1.31,8.13,10.41,9.09,9.71,11.23];
+const {D,LTR,LTE,SD,SMU,SNR}=window.RDATA;
 
 const $=id=>document.getElementById(id);
 const fmt=(v,p=3)=>{
@@ -1195,6 +1275,147 @@ function updB(){
 }
 $('tslider').addEventListener('input',updB);
 updA(); updB();
+})();
+</script>
+
+<script>
+/* ============ figures: bespoke SVG charts from RDATA (no libraries) ========= */
+(function(){
+const R=window.RDATA;
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const C={gold:css('--gold'),blue:css('--blue'),green:css('--green'),red:css('--red'),
+         purple:css('--purple'),mut:css('--mut'),line:css('--line'),tx:css('--tx')};
+const NS='http://www.w3.org/2000/svg';
+function E(t,a,p){const e=document.createElementNS(NS,t);
+  for(const k in a)e.setAttribute(k,a[k]); if(p)p.appendChild(e); return e;}
+function txt(p,x,y,s,fill,size,anchor){const e=E('text',{x,y,fill:fill||C.mut,
+  'font-size':size||10.5,'text-anchor':anchor||'start',
+  'font-family':'Segoe UI,system-ui'},p); e.textContent=s; return e;}
+function sc(v,d0,d1,r0,r1,log){ if(log){v=Math.log10(v);d0=Math.log10(d0);
+  d1=Math.log10(d1);} return r0+(v-d0)*(r1-r0)/(d1-d0); }
+function svg(sel,w,h){const el=document.querySelector(sel+' .fig-plot');
+  if(!el) return null; el.innerHTML='';
+  return E('svg',{viewBox:`0 0 ${w} ${h}`},el);}
+function decades(lo,hi){const out=[];
+  for(let e=Math.ceil(Math.log10(lo));e<=Math.floor(Math.log10(hi));e++)
+    out.push(Math.pow(10,e)); return out;}
+function fmtPow(v){const e=Math.round(Math.log10(v));
+  return e===0?'1':'10'+String(e).split('').map(c=>
+    c==='-'?'⁻':'⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]).join('');}
+
+/* ---- Fig 2: landscape, dual axis ---- */
+(function(){
+const W=560,H=300,m={l:56,r:60,t:16,b:42},s=svg('#fig2',W,H); if(!s)return;
+const X=v=>sc(v,1e-6,0.6,m.l,W-m.r,true);
+const YL=v=>sc(v,8e-4,40,H-m.b,m.t,true);
+const YR=v=>sc(v,5500,9300,H-m.b,m.t,false);
+decades(1e-6,0.6).forEach(d=>{E('line',{x1:X(d),y1:m.t,x2:X(d),y2:H-m.b,
+  stroke:C.line,'stroke-width':.6},s);
+  txt(s,X(d),H-m.b+14,fmtPow(d),C.mut,9.5,'middle');});
+decades(1e-3,40).forEach(d=>txt(s,m.l-6,YL(d)+3,fmtPow(d),C.gold,9,'end'));
+[6000,7000,8000,9000].forEach(v=>txt(s,W-m.r+6,YR(v)+3,String(v),C.blue,9));
+/* reference verticals */
+[[9.68e-4,C.gold,'d* = 9.7e-4 — SGD converged here'],
+ [1/64,C.mut,'1/K_train']].forEach(([v,col,lab])=>{
+  E('line',{x1:X(v),y1:m.t,x2:X(v),y2:H-m.b,stroke:col,'stroke-width':1,
+    'stroke-dasharray':'4 3',opacity:.75},s);
+  txt(s,X(v)+4,m.t+10,lab,col,9.5);});
+/* series */
+const path=(xs,ys,Y,col)=>E('polyline',{points:xs.map((x,i)=>
+  X(x)+','+Y(ys[i])).join(' '),fill:'none',stroke:col,'stroke-width':2},s);
+path(R.D,R.LTR,YL,C.gold); path(R.D,R.LTE,YR,C.blue);
+R.D.forEach((d,i)=>{E('circle',{cx:X(d),cy:YL(R.LTR[i]),r:2.4,fill:C.gold},s);
+  E('circle',{cx:X(d),cy:YR(R.LTE[i]),r:2.4,fill:C.blue},s);});
+txt(s,m.l,12,'L_train (log, gold)',C.gold,10.5);
+txt(s,W-m.r,12,'L_test @1024 (blue)',C.blue,10.5,'end');
+txt(s,(m.l+W-m.r)/2,H-8,'decay rate d (log)',C.mut,10.5,'middle');
+})();
+
+/* ---- Fig 3: signed gradient bars ---- */
+(function(){
+const W=560,H=300,m={l:56,r:16,t:26,b:42},s=svg('#fig3',W,H); if(!s)return;
+const X=v=>sc(v,6e-6,0.6,m.l,W-m.r,true);
+const mid=(m.t+H-m.b)/2+18;
+const mag=g=>sc(Math.abs(g),1e-4,12,0,mid-m.t-8,true);
+E('line',{x1:m.l,y1:mid,x2:W-m.r,y2:mid,stroke:C.mut,'stroke-width':1},s);
+decades(1e-5,0.6).forEach(d=>txt(s,X(d),H-m.b+14,fmtPow(d),C.mut,9.5,'middle'));
+R.SD.forEach((d,i)=>{
+  const g=R.SMU[i], up=g<0, h=Math.max(3,mag(g));
+  E('rect',{x:X(d)-7,y:up?mid-h:mid,width:14,height:h,rx:2,
+    fill:up?C.gold:C.blue,opacity:.9},s);
+  txt(s,X(d),up?mid-h-5:mid+h+11,R.SNR[i].toFixed(0),C.mut,8.5,'middle');});
+txt(s,m.l,12,'↑ gold: pushes decay UP toward d*',C.gold,10.5);
+txt(s,m.l,H-m.b+30,'↓ blue: pushes decay DOWN toward d*   (numbers = gradient SNR)',
+    C.blue,10.5);
+txt(s,(m.l+W-m.r)/2,H-8,'decay rate d (log) — bar height: |mean grad| (log)',
+    C.mut,10.5,'middle');
+E('line',{x1:X(9.68e-4),y1:m.t,x2:X(9.68e-4),y2:H-m.b,stroke:C.gold,
+  'stroke-width':1,'stroke-dasharray':'4 3',opacity:.6},s);
+txt(s,X(9.68e-4)+4,m.t+8,'d*',C.gold,10);
+})();
+
+/* ---- Fig 4: horizon divergence ---- */
+(function(){
+const W=560,H=300,m={l:56,r:110,t:16,b:42},s=svg('#fig4',W,H); if(!s)return;
+const X=v=>sc(v,58,1150,m.l,W-m.r,true);
+const Y=v=>sc(v,0.02,0.6,H-m.b,m.t,true);
+[0.02,0.05,0.1,0.2,0.5].forEach(v=>{E('line',{x1:m.l,y1:Y(v),x2:W-m.r,y2:Y(v),
+  stroke:C.line,'stroke-width':.6},s); txt(s,m.l-6,Y(v)+3,String(v),C.mut,9,'end');});
+R.T.forEach(t=>txt(s,X(t),H-m.b+14,String(t),C.mut,9.5,'middle'));
+const SER=[['dissipative',C.red,''],['conservative',C.purple,''],
+           ['pinned',C.green,''],['constant',C.mut,'5 4']];
+SER.forEach(([k,col,dash])=>{
+  const ys=R.HOR[k];
+  E('polyline',{points:R.T.map((t,i)=>X(t)+','+Y(ys[i])).join(' '),fill:'none',
+    stroke:col,'stroke-width':2,'stroke-dasharray':dash},s);
+  R.T.forEach((t,i)=>E('circle',{cx:X(t),cy:Y(ys[i]),r:2.6,fill:col},s));
+  txt(s,W-m.r+8,Y(ys[ys.length-1])+3,k==='constant'?'no-input const':k,col,10);});
+txt(s,(m.l+W-m.r)/2,H-8,'test horizon t (log) — trained only to t=64',C.mut,10.5,'middle');
+txt(s,m.l,12,'relative ledger error (log)',C.mut,10.5);
+})();
+
+/* ---- Fig 5: rescue arms, horizontal bars ---- */
+(function(){
+const W=1120,H=250,m={l:180,r:70,t:18,b:34},s=svg('#fig5',W,H); if(!s)return;
+const X=v=>sc(v,-7.2,1.6,m.l,W-m.r,false);
+const rows=R.RESCUE, bh=(H-m.t-m.b)/rows.length;
+E('line',{x1:X(0),y1:m.t-4,x2:X(0),y2:H-m.b+4,stroke:C.mut,'stroke-width':1},s);
+[-6,-4,-2,0,1].forEach(v=>txt(s,X(v),H-m.b+16,String(v),C.mut,9.5,'middle'));
+rows.forEach(([name,sk],i)=>{
+  const y=m.t+i*bh+3, col=sk>0.9?(name.includes('Cᵀ')?C.gold:C.green):
+    (sk>-2?css('--amber'):C.red);
+  const x0=Math.min(X(0),X(sk)), w=Math.abs(X(sk)-X(0));
+  E('rect',{x:x0,y,width:Math.max(w,2),height:bh-7,rx:3,fill:col,opacity:.88},s);
+  txt(s,m.l-8,y+bh/2+1,name,C.tx,11,'end');
+  txt(s,sk>0?X(sk)+6:X(sk)-6,y+bh/2+1,(sk>0?'+':'')+sk.toFixed(2),
+      col,10.5,sk>0?'start':'end');});
+txt(s,(m.l+W-m.r)/2,H-6,'ledger skill @ t=1024   (0 = no better than a constant; '+
+  '+1 = perfect; 2 seeds/arm)',C.mut,10.5,'middle');
+})();
+
+/* ---- Fig 1: n=10 strip plot (renders when RDATA.STATS is set) ---- */
+window.renderFig1=function(){
+const ST=R.STATS; if(!ST) return;
+const W=560,H=300,m={l:56,r:14,t:20,b:44},s=svg('#fig1',W,H); if(!s)return;
+const Y=v=>sc(v,-7.4,1.8,H-m.b,m.t,false);
+E('line',{x1:m.l,y1:Y(0),x2:W-m.r,y2:Y(0),stroke:C.mut,'stroke-width':.8,
+  'stroke-dasharray':'4 3'},s);
+[-6,-4,-2,0,1].forEach(v=>{txt(s,m.l-6,Y(v)+3,String(v),C.mut,9,'end');});
+const colors={scalar:C.red,diag:C.red,ks:C.purple,diag0:C.green,
+  scalar0:C.green,pinned:C.gold};
+ST.arms.forEach((a,ai)=>{
+  const x0=m.l+(ai+0.5)*(W-m.l-m.r)/ST.arms.length;
+  a.skills.forEach((v,i)=>{
+    const jit=((i*2654435761)%97/97-0.5)*26;
+    E('circle',{cx:x0+jit,cy:Y(Math.max(v,-7.3)),r:3,fill:colors[a.name]||C.mut,
+      opacity:.75},s);});
+  const med=a.skills.slice().sort((p,q)=>p-q), mv=(med[4]+med[5])/2;
+  E('line',{x1:x0-16,y1:Y(mv),x2:x0+16,y2:Y(mv),stroke:colors[a.name]||C.mut,
+    'stroke-width':2.5},s);
+  txt(s,x0,H-m.b+16,a.name,C.tx,10,'middle');});
+txt(s,m.l,12,'ledger skill @1024, 10 seeds (dots) + median (bar)',C.mut,10.5);
+};
+renderFig1();
 })();
 </script>
 

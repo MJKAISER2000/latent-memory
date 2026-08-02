@@ -17,3 +17,45 @@ n=10 stats run | arms=['scalar', 'diag', 'ks', 'diag0', 'scalar0', 'pinned']
   s2      ks: skill=+0.081 late=1.250 dmin=7.36e-04
   s2   diag0: skill=+1.000 late=0.408 dmin=2.05e-09
   s2 scalar0: skill=+0.989 late=0.592 dmin=2.09e-09
+  s2  pinned: skill=+1.000 late=0.476 dmin=-6.52e-08
+  s3  scalar: skill=-6.583 late=24.776 dmin=9.30e-04
+  s3    diag: skill=-5.228 late=8.427 dmin=8.64e-04
+  s3      ks: skill=-0.507 late=3.221 dmin=8.00e-04
+  s3   diag0: skill=+0.969 late=0.818 dmin=2.06e-09
+  s3 scalar0: skill=+1.000 late=0.356 dmin=2.14e-09
+  s3  pinned: skill=+1.000 late=1.289 dmin=-1.33e-08
+  s4  scalar: skill=-6.403 late=13.246 dmin=9.38e-04
+  s4    diag: skill=-5.422 late=0.249 dmin=1.02e-03
+  s4      ks: skill=+0.628 late=4.178 dmin=5.46e-04
+  s4   diag0: skill=+1.000 late=0.335 dmin=2.06e-09
+  s4 scalar0: skill=+1.000 late=0.307 dmin=2.10e-09
+  s4  pinned: skill=+1.000 late=1.009 dmin=1.55e-07
+  s5  scalar: skill=-5.933 late=6.037 dmin=8.84e-04
+  s5    diag: skill=-4.636 late=5.306 dmin=8.31e-04
+  s5      ks: skill=-0.140 late=6.753 dmin=7.44e-04
+  s5   diag0: skill=+1.000 late=0.625 dmin=2.07e-09
+  s5 scalar0: skill=+0.999 late=0.356 dmin=2.14e-09
+  s5  pinned: skill=+1.000 late=0.442 dmin=1.51e-08
+  s6  scalar: skill=-6.036 late=0.557 dmin=7.76e-04
+  s6    diag: skill=-5.366 late=0.780 dmin=8.73e-04
+  s6      ks: skill=+0.666 late=0.576 dmin=5.30e-04
+  s6   diag0: skill=+0.938 late=0.854 dmin=2.06e-09
+  s6 scalar0: skill=+0.986 late=1.659 dmin=2.11e-09
+  s6  pinned: skill=+1.000 late=0.412 dmin=2.44e-09
+  s7  scalar: skill=-3.842 late=0.646 dmin=8.59e-04
+  s7    diag: skill=-3.591 late=3.446 dmin=8.16e-04
+  s7      ks: skill=-0.257 late=0.966 dmin=7.11e-04
+  s7   diag0: skill=+0.996 late=0.456 dmin=2.06e-09
+  s7 scalar0: skill=+1.000 late=0.257 dmin=2.12e-09
+  s7  pinned: skill=+0.999 late=0.802 dmin=-5.40e-08
+  s8  scalar: skill=-6.105 late=10.971 dmin=8.33e-04
+  s8    diag: skill=-6.362 late=84.759 dmin=7.28e-04
+  s8      ks: skill=+0.259 late=0.616 dmin=7.93e-04
+  s8   diag0: skill=+0.994 late=0.702 dmin=2.06e-09
+  s8 scalar0: skill=+0.978 late=4.159 dmin=2.10e-09
+  s8  pinned: skill=+1.000 late=2.170 dmin=2.96e-07
+  s9  scalar: skill=-6.346 late=5.008 dmin=9.03e-04
+  s9    diag: skill=-6.322 late=5.597 dmin=8.47e-04
+  s9      ks: skill=+0.369 late=0.639 dmin=7.50e-04
+  s9   diag0: skill=+1.000 late=0.283 dmin=2.06e-09
+  s9 scalar0: skill=+1.000 late=0.300 dmin=2.11e-09
