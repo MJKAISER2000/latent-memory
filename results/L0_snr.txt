@@ -1,1 +1,32 @@
 Training a scalar-mode model to convergence first (same recipe)...
+  done (774s). SGD/Adam converged to d = 7.749e-04
+
+==========================================================================
+GRADIENT SNR ACROSS MINIBATCHES  (total loss, exactly as trained)
+critical scale 1/K_train = 0.0156
+==========================================================================
+   decay d  d*K_train    mean grad     sd grad      SNR  regime
+--------------------------------------------------------------------------
+  1.00e-05     0.0006  -4.5424e-04  4.3577e-05   10.424  VISIBLE to Adam
+  3.16e-05     0.0020  -1.3964e-03  1.3318e-04   10.485  VISIBLE to Adam
+  1.00e-04     0.0064  -4.1516e-03  3.7545e-04   11.058  VISIBLE to Adam
+  3.16e-04     0.0202  -9.6000e-03  1.0491e-03    9.151  VISIBLE to Adam
+  1.00e-03     0.0640   1.3550e-03  1.0353e-03    1.309  VISIBLE to Adam
+  3.16e-03     0.2024   2.8390e-01  3.4939e-02    8.125  VISIBLE to Adam
+  1.00e-02     0.6400   2.5988e+00  2.4975e-01   10.405  VISIBLE to Adam
+  3.16e-02     2.0239   1.0079e+01  1.1094e+00    9.085  VISIBLE to Adam
+  1.00e-01     6.4000   1.1039e+01  1.1374e+00    9.706  VISIBLE to Adam
+  3.16e-01    20.2386   4.1962e+00  3.7375e-01   11.227  VISIBLE to Adam
+--------------------------------------------------------------------------
+
+IMPLIED DRIFT BUDGET
+  distance in s-space, d=1e-3 -> 1e-5 : 4.61
+  mean sub-critical SNR               : 8.485
+  Adam signal drift per step          : ~2.98e-03
+  steps needed by signal alone        : ~1,546
+  actual training budget              : 3,000 steps
+  shortfall                           : 1x
+
+If SNR < 1 sub-critically and the shortfall is large, the parking of
+learned decay is quantitatively explained UNDER ADAM -- the flat-basin
+mechanism survives the optimizer-normalisation objection.

@@ -215,14 +215,17 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
   <h3>L0-Frontier &mdash; the corrected experiment
   <span class="pill p-find" id="frontier-pill">REPLICATED 3/3 SEEDS</span></h3>
   Under <b>capacity pressure</b>, where forgetting is necessary but ledger retention forbids it on
-  one direction, and with every audit fix applied: <b>gradient descent does not discover selective
-  protection even when the parameterization can represent it.</b> Learned decay parks in the
-  train-horizon flat basin (\(d \approx 7{-}8\times10^{-4}\): invisible over 64 steps, fatal over
-  1024). The soft \(K{+}S\) mode finds the right <i>direction</i> (align 0.98) but its residual
-  leak halves its skill. The hard \(C^\top W = 0\) constraint alone wins both axes — ledger skill
-  +1.00 <i>and</i> best content among protecting modes — while forgetting aggressively everywhere
-  else. <span class="mut">The surviving claim is about optimization, not expressivity: hard
-  structure substitutes for gradient pressure that short-horizon training cannot provide.</span>
+  one direction, and with every audit fix applied: <b>gradient descent does not deliver selective
+  protection even when the parameterization can represent it.</b> Learned decay converges to
+  \(d^\*\approx 7{-}9\times10^{-4}\) — the SNR probe showed this is an <i>attractor</i> of the
+  short-horizon objective (mild forgetting cuts interference; the ledger cost over 64 steps is
+  absorbed by the learned gain), and that same optimum is fatal at 1024 steps (gain
+  \(\approx 0.45\)). The soft \(K{+}S\) mode finds the right <i>direction</i> (align 0.89&ndash;0.98,
+  3/3 seeds) but keeps the leak. The hard \(C^\top W = 0\) constraint alone wins both axes —
+  ledger skill +1.000 <i>and</i> best content among protecting modes — while forgetting
+  aggressively everywhere else. <span class="mut">The claim: training optimizes retention for the
+  horizon it sees and trades away everything longer; hard structure removes the protected
+  direction from that trade entirely.</span>
 </div>
 
 </div>
@@ -295,9 +298,10 @@ Trained at \(K{=}64\), evaluated at \(t{=}1024\). <b>Three seeds, mean&nbsp;&plu
 <td class="hi">+1.000 &plusmn; 0.000</td><td class="hi">0.62 &plusmn; 0.10</td>
 <td class="gold">0 (exact)</td><td class="gold">1.00</td></tr>
 </table>
-<p class="mut">The learned decays parked at 7.2&ndash;9.0&times;10<sup>-4</sup> from init
-10<sup>-3</sup> — across every mode and seed, they barely moved. That tight clustering at the
-init is itself the flat-basin signature (see the mechanism probe below).</p>
+<p class="mut">The learned decays converged to 7.2&ndash;9.0&times;10<sup>-4</sup> across every
+mode and seed. The SNR probe later showed this tight clustering is an <b>attractor of the
+training objective</b> (gradient pushes decay up from below, down from above), not inertia at the
+init — training <i>selects</i> the under-retaining rate.</p>
 <p><b>The gradient across modes is the finding.</b> Learned decay parks in a flat basin: any rate
 below \(\sim 1/K_{\text{train}}\) is invisible during training
 (\(e^{-7.8\times10^{-4}\cdot 64}\!\approx\!0.95\)) yet fatal at test
@@ -368,14 +372,15 @@ precision, verified. An <i>auditable</i> memory — the balance law \(C^\top z_t
 C^\top g_k\) is checkable online, and its defect is a principled staleness detector.</li>
 <li><b>A validated audit methodology</b> for structured-memory claims (arguably the most
 transferable artifact of the project so far).</li>
-<li><b>The frontier finding (replicated 3/3 seeds):</b> learned decay <i>can</i>
-represent selective protection but gradient training does not <i>find</i> it under
-train-short/test-long — the flat basin below \(d\sim 1/K_{\text{train}}\) leaves the decay
-parameter at its init (measured: 7.2&ndash;9.0&times;10<sup>-4</sup> from 10<sup>-3</sup>, every
-mode, every seed). The hard constraint buys <b>optimization reliability, not expressivity</b>.
-Concrete prediction for real systems: IndexMem-style learned-&lambda; memories should
-under-retain at horizons beyond their training length, fixably by pinning. Baseline-rescue
-attempts (the honest falsification path) are running now.</li>
+<li><b>The frontier finding (replicated 3/3 seeds, mechanism measured):</b> learned decay
+<i>can</i> represent selective protection but training <i>optimizes it away</i> — the
+short-horizon objective has an interior optimum \(d^\*\!\approx\!7\times10^{-4}\) (SNR probe:
+gradient sign flips there; all 12 learned runs converged to it) that under-retains
+catastrophically at 16&times; the training horizon. The hard constraint removes the protected
+direction from that interference-vs-retention trade entirely. Concrete prediction for real
+systems: learned-&lambda; memories (IndexMem-style) under-retain beyond their training length,
+fixably by pinning — and no initialization trick can save them, because the optimum is an
+attractor (init0 rescue arm testing this now).</li>
 <li><b>The L1/L2 assets are built and unblocked</b>: haystack corpus with per-block durability
 labels (retrieve / update / count — count's answer appears nowhere in the context), frozen-LM
 block-state precompute, SLURM scripts for the university cluster.</li>
@@ -409,12 +414,21 @@ training cannot provide <span class="pill p-find" id="f1-pill">REPLICATING</span
 horizon <i>and</i> forget aggressively to stay useful, gradient descent does not discover
 selective protection — even when the parameterization can represent it exactly. A hard
 architectural constraint \(C^\top W = 0\) provides it at zero optimization cost.</dd>
-<dt>Mechanism</dt><dd>Every decay rate \(d \lesssim 1/K_{\text{train}}\) is a flat basin of the
-training loss: \(e^{-d\,K_{\text{train}}}\approx 1\) makes rates below the training horizon
-indistinguishable, so SGD parks at whatever the init gave it (measured: \(d\approx
-7{-}9\times10^{-4}\) from init \(10^{-3}\), across all seeds and modes). At test horizon
-\(K_{\text{test}}=16\,K_{\text{train}}\) that residual is fatal:
-\(e^{-d\,K_{\text{test}}}\approx 0.45\).</dd>
+<dt>Mechanism</dt><dd><b>Revised after the SNR probe refuted our first story.</b> We initially
+blamed a flat basin (no gradient signal below \(d\sim 1/K_{\text{train}}\)). Direct measurement
+says otherwise: gradient SNR across minibatches is 8&ndash;11 at <i>every</i> decay value — Adam
+sees the parameter fine. The signs reveal the real mechanism: for \(d \lesssim 5\times10^{-4}\)
+the training gradient pushes decay <b>up</b>, above \(3\times10^{-3}\) it pushes decay
+<b>down</b> — the short-horizon objective has an <b>interior optimum</b> \(d^\*\!\approx\!
+7\times10^{-4}\) (mild forgetting cuts interference over 64 steps; the ledger cost
+\(e^{-d^\*K_{\text{train}}}\!\approx\!0.95\) is absorbed by the learned gain). Every learned mode
+converged to exactly this attractor (7.2&ndash;9.0&times;10<sup>-4</sup>, all seeds). At
+\(K_{\text{test}}=16K_{\text{train}}\), that same optimum gives gain
+\(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) — catastrophic. <b>Training doesn't fail to find
+protection; it actively trades it away at the horizon it can see.</b> Consequence: no
+initialization can rescue the baselines (an attractor recaptures init-at-zero — prediction under
+test in the rescue suite). Only changing the objective (train at deployment length — expensive)
+or removing the ledger direction from the tradeoff structurally (\(C^\top W{=}0\)) escapes.</dd>
 <dt>Evidence</dt><dd id="f1-evidence">Frontier experiment, matched learned baselines, all audit
 fixes, <b>3/3 seeds</b>: scalar skill &minus;6.54&plusmn;0.21; diag &minus;6.12&plusmn;0.18 (0/3
 seeds zero a direction); soft K+S finds the direction every seed (align 0.89&ndash;0.98) but keeps
@@ -423,9 +437,11 @@ exact zero decay and the best, most stable content (0.62&plusmn;0.10). Every lea
 at 7.2&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
 sub-critical region \(dK_{\text{train}}\!<\!0.1\), \(L_{\text{train}}\) varies 6,365&times; less
 than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-critical.
-<span class="mut" id="f1-snr">Adam-correct SNR probe + baseline-rescue suite (init-at-zero,
-explicit decay regularizer, 3&times; training) in flight — results will finalize or revise this
-card.</span></dd>
+<span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 8&ndash;11 at all
+decay values, gradient sign flips around \(d^\*\approx 7\times10^{-4}\), confirming an interior
+attractor of the training objective, which is where all 12 learned runs converged.
+<span class="mut">Rescue suite still running; its init0 arm now tests a sharp prediction: decay
+initialized at zero should drift back UP toward the attractor.</span></span></dd>
 <dt>Significance</dt><dd>It reframes what structure is <i>for</i>: not expressivity (the baselines
 could express the solution) but <b>reliability of optimization under train-short/test-long</b> —
 which is the universal regime of LLM memory (trained on 4–16k, deployed on 100k+). Concrete
@@ -553,12 +569,14 @@ in §5: <i>every tier includes its own falsification attempt before its claims a
 <div class="card">
 <h3>T0 &mdash; the two verdicts everything waits on <span class="pill p-run">RUNNING</span></h3>
 <dl class="frow">
-<dt>SNR probe</dt><dd><code>l0_snr.py</code> — the Adam-correct mechanism test. Measures
-\(\mathrm{SNR}(d) = |\mathbb E_b[\partial L/\partial s]| \,/\, \mathrm{SD}_b[\partial L/\partial s]\)
-across minibatches. <b>Pass:</b> SNR crosses 1 near \(d \approx 1/K_{\text{train}}\) and the
-implied drift budget exceeds the training budget by orders of magnitude. <b>Fail:</b> SNR &gt; 1
-sub-critically — then the flat-basin story is wrong <i>even though the frontier result stands</i>,
-and F1's mechanism paragraph gets rewritten to "unknown".</dd>
+<dt>SNR probe</dt><dd><code>l0_snr.py</code> <span class="pill p-find">DONE — took the "fail"
+branch, productively</span><br>
+SNR measured 8&ndash;11 at every decay value: the flat-basin story was <b>wrong</b>. But the
+gradient's <i>sign structure</i> revealed the true mechanism — an interior optimum
+\(d^\*\approx 7\times10^{-4}\) of the short-horizon objective that every learned run converged
+to. F1's mechanism row was rewritten from "no gradient signal" to "the objective actively
+selects an under-retaining decay". A refuted hypothesis with a better replacement — the probe
+did exactly its job.</dd>
 <dt>Rescue suite</dt><dd><code>l0_mechanism.py</code> Part B. The dangerous one is
 <code>diag&nbsp;init0</code>: initialize all decay at \(\sim\!0\) and train.
 <b>If it matches pinned on both axes, F1 collapses</b> to "initialize decay at zero" — a
