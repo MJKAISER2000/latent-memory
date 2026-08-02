@@ -98,6 +98,7 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
 <div class="tabs">
   <button class="tab active" data-page="page-log">Research log</button>
   <button class="tab" data-page="page-findings">Findings</button>
+  <button class="tab" data-page="page-roadmap">Roadmap</button>
 </div>
 
 <div id="page-log">
@@ -528,14 +529,166 @@ init-sensitivity footnote. This must be tried <i>before</i> claiming novelty.</l
 
 </div><!-- /page-findings -->
 
+<!-- ============================================================ ROADMAP PAGE -->
+<div id="page-roadmap" hidden>
+
+<div class="card" style="border-left:3px solid var(--blue)">
+<h2>Roadmap &mdash; from one replicated toy finding to a defensible research program</h2>
+<p>Organized in tiers by <b>compute required</b> and gated by <b>go/no-go decisions</b>, so the
+laptop keeps producing verdicts while the cluster items queue. Guiding rule learned the hard way
+in §5: <i>every tier includes its own falsification attempt before its claims are trusted.</i></p>
+<table>
+<tr><th>tier</th><th>where</th><th>wall-clock</th><th>what it decides</th></tr>
+<tr><td>T0 &middot; verdicts in flight</td><td>laptop, running</td><td>hours</td>
+<td>whether F1's mechanism survives (SNR) and whether a one-line rescue kills it (init0)</td></tr>
+<tr><td>T1 &middot; strengthen locally</td><td>laptop</td><td>days</td>
+<td>scope of F1: tasks, multi-ledger, statistics, first real-LM contact</td></tr>
+<tr><td>T2 &middot; scale + real systems</td><td><b>university cluster</b></td><td>weeks</td>
+<td>whether any of this matters outside toys — the publishable claims</td></tr>
+<tr><td>T3 &middot; second branch + theory</td><td>mixed</td><td>parallel</td>
+<td>physics scratchpad; formal flat-basin proposition</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>T0 &mdash; the two verdicts everything waits on <span class="pill p-run">RUNNING</span></h3>
+<dl class="frow">
+<dt>SNR probe</dt><dd><code>l0_snr.py</code> — the Adam-correct mechanism test. Measures
+\(\mathrm{SNR}(d) = |\mathbb E_b[\partial L/\partial s]| \,/\, \mathrm{SD}_b[\partial L/\partial s]\)
+across minibatches. <b>Pass:</b> SNR crosses 1 near \(d \approx 1/K_{\text{train}}\) and the
+implied drift budget exceeds the training budget by orders of magnitude. <b>Fail:</b> SNR &gt; 1
+sub-critically — then the flat-basin story is wrong <i>even though the frontier result stands</i>,
+and F1's mechanism paragraph gets rewritten to "unknown".</dd>
+<dt>Rescue suite</dt><dd><code>l0_mechanism.py</code> Part B. The dangerous one is
+<code>diag&nbsp;init0</code>: initialize all decay at \(\sim\!0\) and train.
+<b>If it matches pinned on both axes, F1 collapses</b> to "initialize decay at zero" — a
+one-line practitioner fix and a different (smaller, still publishable) paper. The interesting
+sub-case: does its decay <i>drift back up</i> under the content loss's interference pressure?
+If yes, protection requires active maintenance, and the constraint story returns stronger.</dd>
+<dt>Decision</dt><dd class="mono">
+SNR pass + rescue fails &rarr; F1 stands as stated &rarr; proceed to T1<br>
+SNR pass + init0 rescues &rarr; F1 &rarr; "init matters, structure optional" &rarr; T1 re-scoped<br>
+SNR fail &rarr; mechanism unknown &rarr; T1 item 3 (theory probe) becomes first priority</dd>
+</dl>
+</div>
+
+<div class="card">
+<h3>T1 &mdash; laptop-scale strengthening (order matters)</h3>
+<ol>
+<li><b>Bounded ledger encodings.</b> The F5 drift problem (accumulator leaves the decoder's
+training range) is a design bug to fix <i>before</i> L1: pin rates/means
+(\(C^\top z \approx \frac1t\sum\)flux, via a time-conditioned readout) instead of raw sums, or
+add a norm-bounded companion coordinate. One day; unblocks everything downstream.</li>
+<li><b>Statistics the audit demanded.</b> 10+ seeds on the frontier, medians + paired
+Wilcoxon, plus an \(\varepsilon\)-sweep tracing the fixed-decay Pareto front. n=3 has a
+significance floor of p=0.125 — currently our biggest formal weakness. Overnight run.</li>
+<li><b>Task generality scan.</b> F1 is shown for pure accumulation. Sweep tasks whose labels are
+NOT integrals: max-so-far, latest-value (the `update` semantics), conditional count, decaying
+average. Prediction: pinning helps exactly when the target is a conserved functional of the
+stream; elsewhere it should be neutral (and if it <i>hurts</i>, that bounds the method's scope
+honestly).</li>
+<li><b>Multi-ledger scaling.</b> \(n_{\text{pinned}} \in \{2,4,8\}\) with independent supervised
+fluxes (the paper's vector-valued \(\mathcal C\), Remark 3). Where does protection stop being
+free — when does pinning k directions of an \(n_z{=}8\) latent leave too little capacity for
+content?</li>
+<li><b>L1-count: first real-LM contact.</b> Assets already built: haystack `count` (answer stated
+nowhere in context), Qwen2.5-0.5B block states cached by <code>precompute_states.py</code>,
+per-block durability labels. Memory module trains on cached states in minutes. <b>Kill criterion:
+if pinned shows no advantage over learned-decay baselines on real representations with the
+flat-basin conditions present (train 4k, test 32k tokens), the memory branch ends here</b> and T2
+items 2–3 are cancelled in favor of T3.</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>T2 &mdash; what genuinely needs the university cluster</h3>
+<p class="mut">Everything below is blocked on cluster access or unbearably slow on 6 GB.
+Estimates assume A100-class nodes; <code>scripts/job.sbatch</code> already has the stage
+structure.</p>
+<table>
+<tr><th>experiment</th><th>est. GPU-h</th><th>what it can conclude</th></tr>
+<tr><td><b>1. Frontier scaling map.</b> 10 seeds &times; 4 modes &times;
+\(n_z\in\{8,32,128\}\) &times; \(K_{\text{train}}\in\{64,256,1024\}\) &times;
+\(K_{\text{test}}/K_{\text{train}}\in\{4,16,64\}\)</td><td>~60</td>
+<td>Is the flat-basin onset quantitatively at \(d\sim 1/K_{\text{train}}\) everywhere? A clean
+scaling law here is the strongest scientific (vs engineering) claim available to us.</td></tr>
+<tr><td><b>2. L1 at scale.</b> Qwen2.5-1.5B/7B precompute over 500&times;22k-token samples
+(~11M tokens per config), memory training sweeps</td><td>~30</td>
+<td>Does the effect survive rich representations and realistic block statistics?</td></tr>
+<tr><td><b>3. IndexMem head-to-head (flagship).</b> Reimplement the eviction+latent-memory
+harness on Llama-3.1-8B; swap its learned \(\lambda\) for the pinned generator; RULER/NIAH/
+LongBench at 2&ndash;8&times; the memory's training length</td><td>~250&ndash;400</td>
+<td>The publishable real-system claim: "learned-decay latent memories under-retain beyond their
+training horizon; pinning fixes it." Risk: no public IndexMem code — fallback is our own harness
+with their published update rule, which is one line.</td></tr>
+<tr><td><b>4. Train-horizon transfer curve.</b> For the best real-system config: sweep the
+memory's training length, measure where retention breaks vs \(1/K_{\text{train}}\)</td>
+<td>~80</td><td>Turns item 3's point estimate into a law; the difference between a workshop
+poster and a main-track paper.</td></tr>
+<tr><td><b>5. Rescue suite at scale.</b> init0 / log-parameterized decay / decay weight-decay /
+horizon curriculum, on the real-LM setup</td><td>~40</td>
+<td>The reviewers' first question, answered pre-emptively. If a cheap trick works at scale,
+we say so and the paper becomes about the trick.</td></tr>
+</table>
+<p><b>Access prep checklist (do before the allocation lands):</b> fill in partition/account in
+<code>scripts/job.sbatch</code>; mirror the repo; pre-download model weights to the cluster's
+shared cache (login nodes often lack egress); test <code>scripts/setup.sh</code> in an
+interactive session; budget: all of T2 &asymp; <b>460&ndash;610 GPU-h</b> — a modest single
+allocation request.</p>
+</div>
+
+<div class="card">
+<h3>T3 &mdash; parallel tracks (cheap, high option value)</h3>
+<ol>
+<li><b>Physics scratchpad (the original second question).</b> Latent twin of heat/wave (FFT
+integrator, ~50 lines, no Dedalus) with tool-exposed <code>propagate/decode/invariants</code>;
+measure LLM hallucination rate on "what is the energy at t=X" with vs without the audited latent.
+Runs on the laptop; crowded-field risk is far lower than KV compression. If the memory branch
+dies at T1-5, this becomes the primary project.</li>
+<li><b>Formalize the flat basin.</b> The loss depends on decay only through
+\(e^{-d\,\Delta_j}\) for train-pair gaps \(\Delta_j \le K_{\text{train}}\), so
+\(\partial L/\partial d = O(K_{\text{train}})\) while the test loss carries
+\(O(K_{\text{test}})\) sensitivity — with the SNR data, this should become a short proposition
+with a testable constant. Zero GPU. Makes the paper's core claim architecture-independent.</li>
+<li><b>Balance-law auditing.</b> The compatibility defect \(|\mathcal C(d(z)) - \mathcal C_Z(z)|\)
+as an online staleness alarm — prototype on L1 states; if it flags exactly the samples where
+retrieval fails, that is a practical contribution independent of the retention race.</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>Publication strategy &amp; risk register</h3>
+<dl class="frow">
+<dt>Minimal unit</dt><dd>Already in hand if T0 passes: <i>"Learned decay under-retains beyond its
+training horizon: a flat-basin analysis"</i> — F1 (mechanism + toy evidence) + F2 (the audit
+protocol as a contribution, including the retraction as a case study). Workshop-ready after T1
+items 2–3.</dd>
+<dt>Full paper</dt><dd>Needs T2 items 3–4 (real system + scaling law). Positioning: not "our
+architecture wins" but "here is a failure mode every learned-decay memory has, its mechanism,
+and the one-projection fix".</dd>
+<dt>Honest register</dt><dd>
+&bull; init0 rescues at T0 &rarr; smaller paper about initialization, not structure.<br>
+&bull; L1-count null at T1-5 &rarr; memory branch closes; T3-1 becomes primary; the audit-protocol
+paper survives regardless.<br>
+&bull; IndexMem irreproducible &rarr; own-harness fallback, weaker but defensible.<br>
+&bull; Someone publishes the same mechanism first — the flat-basin observation is simple enough
+that this is a live risk; T1-2/T1-5 pace matters.<br>
+&bull; All current evidence is one toy family — every claim above is scoped until T1-5.</dd>
+</dl>
+</div>
+
+</div><!-- /page-roadmap -->
+
 <script>
-/* tab switching */
+/* tab switching (N pages) */
 document.querySelectorAll('.tab').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
-    document.getElementById('page-log').hidden = b.dataset.page!=='page-log';
-    document.getElementById('page-findings').hidden = b.dataset.page!=='page-findings';
+    ['page-log','page-findings','page-roadmap'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.hidden = b.dataset.page!==id;
+    });
     window.scrollTo(0,0);
   };
 });
