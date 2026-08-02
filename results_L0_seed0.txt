@@ -1,0 +1,20 @@
+device=cuda  train horizon=64  test horizon=1024
+
+[        free] trained in 921.3s   ledger_mse=5.11e-02  content_mse=1.09e-01  max_eig(W+W^T)=+1.14e-02
+[ dissipative] trained in  79.4s   ledger_mse=5.08e-02  content_mse=8.44e-02  max_eig(W+W^T)=-2.00e-03
+[conservative] trained in 102.8s   ledger_mse=5.00e-02  content_mse=2.37e-01  max_eig(W+W^T)=+0.00e+00
+[      pinned] trained in  87.3s   ledger_mse=5.76e-02  content_mse=8.15e-02  max_eig(W+W^T)=+7.20e-08
+
+==========================================================================
+RELATIVE LEDGER ERROR vs HORIZON   (trained only up to t=64)
+==========================================================================
+         mode |       t=16       t=64      t=128      t=256      t=512     t=1024
+--------------------------------------------------------------------------
+         free |     1.5358     0.0469     0.0370     0.0384     0.0524     0.0902
+  dissipative |     0.7638     0.0435     0.0356     0.0790     0.1771     0.3397
+ conservative |     0.6792     0.0470     0.0384     0.0582     0.1597     0.5021
+       pinned |     1.8423     0.0456     0.0359     0.0229     0.0148     0.0116
+--------------------------------------------------------------------------
+t=16,64 are inside the training horizon; t>=128 is extrapolation.
+
+pinned: err(1024)/err(64) = 0.25  (sqrt-law would predict ~4.00 if abs error random-walks and M_t grows linearly, less since M_t grows too)

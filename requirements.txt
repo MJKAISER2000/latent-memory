@@ -1,0 +1,13 @@
+# Core (L0 / L0.5 -- synthetic experiments, no LM needed)
+torch>=2.4
+numpy>=1.26
+
+# L1 onward (real LM hidden states, KV cache)
+transformers>=4.44
+tokenizers>=0.19
+safetensors>=0.4
+accelerate>=0.33
+datasets>=2.20
+
+# Optional: plotting for the retention curves
+matplotlib>=3.8
