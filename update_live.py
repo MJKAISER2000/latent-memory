@@ -42,7 +42,7 @@ def parse_stats():
     last = [f"s{s} {m}: skill {sk}, content {la}" for s, m, sk, la, _ in rows[-4:]]
     summary = None
     if "MEDIAN [IQR]" in txt:
-        med = re.findall(r"^\s+(\w+) \| ([+-][\d.]+) \[([^\]]+)\] \|\s+([\d.]+)",
+        med = re.findall(r"^\s*(\w+) \|\s+([+-][\d.]+) \[([^\]]+)\] \|\s+([\d.]+)",
                          txt, re.M)
         summary = [{"arm": a, "skill_med": sm, "skill_iqr": iq, "late_med": lm}
                    for a, sm, iq, lm in med]
@@ -73,6 +73,9 @@ def run_table():
     add("SNR probe", "L0_snr.txt", "IMPLIED DRIFT")
     add("Landscape + rescue suite", "L0_mechanism.txt", "pinned  baseline")
     add("L0.5 anchor transport", "L05_anchor.txt", "interior (t<64")
+    add("Retraction control (regenerated)", "adv_control.txt", "pinned(e=0.001)   1024")
+    add("Freeze probe", "freeze_probe.txt", "VERDICT")
+    add("L0-Forget (necessity + arms)", "L0_forget.txt", "READING")
     add("Verification pass", "VERIFICATION.md", "claims verified")
     st = parse_stats()
     runs.append({"name": "n=10 statistics (6 arms)",

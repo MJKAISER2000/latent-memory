@@ -1,0 +1,8 @@
+FREEZE PROBE  diag init0, 600 steps, seed 0, device cuda
+  |dL/d(raw d)|   median 2.133e-09   p95 4.357e-09
+  Adam m-hat max  3.353e-11
+  Adam v-hat max  7.044e-18   sqrt(v-hat) 2.654e-09   adam_eps 1e-08  -> ratio sqrt(v)/eps = 0.265
+  |step| median   4.959e-05   (lr = 3e-03; sign-following Adam would give ~3e-03)
+  cumulative drift over 600 steps: 2.352e-03 raw units
+  raw distance to attractor: ~12.9; extrapolated steps to reach it: 2.60e+02k
+  VERDICT: EPS-FLOOR CONFIRMED: sqrt(v-hat) << adam_eps, steps collapse to ~lr*g/eps

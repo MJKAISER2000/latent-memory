@@ -1,4 +1,9 @@
 """
+SUPERSEDED (audit, Aug 2026): this experiment inherits the retracted
+fixed-epsilon confound from toy_ledger and was killed mid-run; its partial log
+was removed from results/. Kept for history only -- do not cite. The corrected
+comparison is l0_frontier.py / l0_stats.py.
+
 L0-HARD: the ledger experiment on the NON-DEGENERATE task.
 
 The original L0 used a deposit rate shared by every sample, so M_t concentrated
@@ -31,13 +36,15 @@ import torch
 import toy_ledger as T
 from trivial_baseline import diagnose, HORIZONS
 
-T.RATE_JITTER = True          # <-- the whole point
+# moved into main() by the audit: setting module globals at import time
+# mutated toy_ledger for every co-importer.
 
 SEEDS = [0, 1, 2]
 MODES = ["dissipative", "conservative", "pinned"]
 
 
 def main():
+    T.RATE_JITTER = True          # <-- the whole point
     print("L0-HARD  (per-sample deposit rate; constant predictor ~0.47 rel err @ t=1024)")
     print(f"seeds={SEEDS}  modes={MODES}\n")
 

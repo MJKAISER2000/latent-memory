@@ -1,6 +1,7 @@
 # Core (L0 / L0.5 -- synthetic experiments, no LM needed)
 torch>=2.4
 numpy>=1.26
+scipy>=1.11        # Wilcoxon tests in l0_stats.py
 
 # L1 onward (real LM hidden states, KV cache)
 transformers>=4.44

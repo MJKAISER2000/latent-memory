@@ -23,7 +23,7 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | pinned skill = +1.000 every seed | L0_frontier.txt | 1.000,1.000,1.000 | 1.000 x3 | OK |
 | pinned decay_min ~ 0 (|.| < 1e-6) | L0_frontier.txt | 1.2e-07,8.1e-08,6.5e-08 | <1e-6 | OK |
 | learned decay parked in [6.7e-4, 9.0e-4] | L0_frontier.txt | [6.73e-04,9.01e-04] | [6.7e-4,9.0e-4] | OK |
-| SNR in [8,12] range at all decays (claimed 8-11) | L0_snr.txt | [1.31,11.23] | [1.3,11.3] | OK |
+| SNR > 1 at all sampled decays, range 1.3-11.2 as cited | L0_snr.txt | [1.31,11.23] | [1.31,11.23] | OK |
 | SNR run converged decay | L0_snr.txt | 0.0007749 | 0.000775 | OK |
 | gradient negative (pushes decay UP) for d<=3.2e-4 | L0_snr.txt | 4 negative rows | >=3 | OK |
 | L_train minimum value at d=9.7e-4 | L0_mechanism.txt | 0.0011 | 0.0011 | OK |
@@ -50,5 +50,17 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | pinned vs diag0: parity (no significant difference) | L0_stats.txt | 6W/1L/3T | neither side >=9 | OK |
 | pinned vs scalar0: parity (no significant difference) | L0_stats.txt | 5W/2L/3T | neither side >=9 | OK |
 | pinned IQR degenerate at [1.000,1.000] | L0_stats.txt | [1.000,1.000] | [1.000,1.000] | OK |
+| adv control: fixed-eps raw rel err @1024 | adv_control.txt | 0.3386 | 0.3386 | OK |
+| adv control: eps~0 recal vs pinned recal ratio ~1.0x | adv_control.txt | 0.991 | 0.9-1.1 | OK |
+| adv control: no-input floor @1024 vs analytic 0.0700 | adv_control.txt | 0.0705 | 0.07 | OK |
+| freeze probe: sqrt(v-hat) below Adam eps=1e-8 | freeze_probe.txt | 2.654e-09 | <1e-8 | OK |
+| freeze probe verdict: eps-floor confirmed | freeze_probe.txt | present | present | OK |
+| l0_forget Phase A: necessity criterion evaluated | L0_forget.txt | 92.4% vs 20% required | PASS or FAIL recorded | OK |
+| RDATA.LTR matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.00e+00 | <=2% | OK |
+| RDATA.LTE matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.05 | <=1.0 abs | OK |
+| RDATA.HOR.dissipative matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
+| RDATA.HOR.conservative matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
+| RDATA.HOR.pinned matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
+| RDATA.STATS pinned skills match log rows | dashboard vs L0_stats.txt | 10 values | identical multiset | OK |
 
-**46/46 claims verified; 0 mismatches.**
+**58/58 claims verified; 0 mismatches.**

@@ -203,6 +203,12 @@ class ExpFlow(nn.Module):
         """z: (B, n_z) latent states.  n: (B,) non-negative integer offsets."""
         Es = self.powers(W) if Es is None else Es
         n = n.long()
+        # audit fix: offsets beyond 2**n_bits used to be silently reduced
+        # modulo 2**n_bits; that is a wrong answer, not a range reduction.
+        if bool((n < 0).any()) or bool((n >= 2 ** self.n_bits).any()):
+            raise ValueError(
+                f"ExpFlow offset out of range [0, {2**self.n_bits}); "
+                "raise n_bits to cover the requested horizon")
         for i in range(self.n_bits):
             bit = ((n >> i) & 1).bool()
             if not bit.any():
@@ -313,6 +319,11 @@ class LatentTwinMemory(nn.Module):
 # ---------------------------------------------------------------------------
 
 
+# NOTE (audit): the three loss helpers below are unexercised API stubs --
+# no experiment in this repo calls them. The experiments supervise the
+# ledger directly (F.mse_loss on the affine readout). They document how the
+# paper's pullback/conformity losses would attach; they are not evidence
+# that those losses were used.
 def pullback_loss(latent_fn: torch.Tensor, physical_fn: torch.Tensor) -> torch.Tensor:
     """Paper Eq. (7): align the latent functional with the decoded physical one.
 

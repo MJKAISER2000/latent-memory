@@ -10,7 +10,7 @@ learned-decay memory under-retain beyond its training length.
 research log (with interactive data sliders and an animated traditional-context vs
 latent-memory comparison), findings with per-claim provenance links, a ranked
 "most promising" page, and the roadmap. Every quantitative claim is recomputed from raw
-logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (29/29).
+logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (58/58).
 
 Headline (toy-scale, honestly scoped; n=10, pre-registered superiority tests all
 p = 0.002): the short-horizon training objective has an
@@ -95,6 +95,8 @@ python latent_twin_memory.py
 Verifies `max|CᵀW|`, skewness of `K`, `eig(W+Wᵀ) ≤ 0`, ledger drift over t=10⁴,
 binary-powering vs. `torch.matrix_exp`, and the driven balance law. All pass.
 Residuals are float32 precision — confirmed by rerunning under `torch.float64`.
+Exact residual magnitudes are device-dependent (GPU fp32 ~1e-7, CPU fp32 ~1e-9);
+orders of magnitude, not exact values, are the claim.
 
 ### 1. L0 — synthetic ledger, extrapolation test — **RETRACTED AS AN ARTIFACT**
 
@@ -117,6 +119,11 @@ python toy_ledger.py
 > of the metric, not evidence. Also: calling the fixed-ε dissipative mode the
 > "Mamba/IndexMem corner" was a misattribution — their decay is *learned*,
 > with no floor. See `l0_frontier.py` for the corrected experiment.
+>
+> *Provenance (audit, Aug 2026): the control numbers above were originally
+> produced without a saved log. Re-run with a committed log in
+> `results/adv_control.txt`: eps~0 recalibrated 0.0115 vs pinned 0.0116
+> (ratio 0.99x); fixed-eps raw 0.3386; no-input floor 0.0705 vs analytic 0.0700.*
 
 Original (artifact-contaminated) numbers, kept for the record:
 
@@ -158,6 +165,20 @@ python precompute_states.py --jsonl data/retrieve_2k.jsonl --out cache/retrieve_
 
 Defaults: Qwen2.5-0.5B, penultimate layer, 64-token blocks, `--context-mode local`.
 Lower `--chunk` if you OOM on 6 GB.
+
+### 5. Corrected frontier + mechanism + statistics (the live claims)
+
+```bash
+python -u l0_frontier.py  | tee results/L0_frontier.txt    # 4 modes x 3 seeds, ~25 min
+python -u l0_snr.py       | tee results/L0_snr.txt         # gradient SNR probe, ~15 min
+python -u l0_mechanism.py | tee results/L0_mechanism.txt   # landscape + rescue, ~60 min
+python -u l0_stats.py     | tee results/L0_stats.txt       # n=10 x 6 arms, ~2 h GPU
+python -u adv_recal.py 0  | tee results/adv_control.txt    # retraction control evidence
+python -u freeze_probe.py | tee results/freeze_probe.txt   # init0 freeze mechanism
+python -u l0_forget.py    | tee results/L0_forget.txt      # forced-forgetting benchmark
+python capture_env.py                                       # environment provenance
+python verify_numbers.py                                    # regenerate VERIFICATION.md
+```
 
 ---
 

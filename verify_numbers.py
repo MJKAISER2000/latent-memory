@@ -93,9 +93,12 @@ def main():
     # --- SNR probe claims ---
     snr_txt = (R / "L0_snr.txt").read_text()
     snrs = [float(m) for m in re.findall(r"\s([\d.]+)\s+(?:VISIBLE|noise)", snr_txt)]
-    OUT.append(("SNR in [8,12] range at all decays (claimed 8-11)",
-                "L0_snr.txt", f"[{min(snrs):.2f},{max(snrs):.2f}]", "[1.3,11.3]",
-                "OK" if min(snrs) > 1.0 else "**MISMATCH**"))
+    # docs claim (post-audit wording): SNR > 1 at every sampled decay, range
+    # 1.3-11.2, with the 1.3 dip at d* where the mean gradient crosses zero.
+    rng_ok = abs(min(snrs) - 1.31) < 0.02 and abs(max(snrs) - 11.23) < 0.1
+    OUT.append(("SNR > 1 at all sampled decays, range 1.3-11.2 as cited",
+                "L0_snr.txt", f"[{min(snrs):.2f},{max(snrs):.2f}]", "[1.31,11.23]",
+                "OK" if (min(snrs) > 1.0 and rng_ok) else "**MISMATCH**"))
     conv = re.search(r"converged to d = ([\d.e-]+)", snr_txt)
     check("SNR run converged decay", float(conv.group(1)), 7.75e-4, 0.01,
           "L0_snr.txt")
@@ -178,6 +181,105 @@ def main():
     OUT.append(("pinned IQR degenerate at [1.000,1.000]", "L0_stats.txt",
                 f"[{pv[2]:.3f},{pv[7]:.3f}]", "[1.000,1.000]",
                 "OK" if iqr_ok else "**MISMATCH**"))
+
+    # --- regenerated retraction control (results/adv_control.txt) ---
+    advp = R / "adv_control.txt"
+    if advp.exists():
+        adv = advp.read_text(encoding="utf-8", errors="replace")
+        rows = re.findall(r"(dissipative|pinned)\(e=([\de.-]+)\)\s+1024\s+([\d.]+)\s+([\d.]+)",
+                          adv)
+        vals = {(m, e): (float(raw), float(rc)) for m, e, raw, rc in rows}
+        if ("dissipative", "0.001") in vals:
+            check("adv control: fixed-eps raw rel err @1024", vals[("dissipative", "0.001")][0],
+                  0.3386, 0.01, "adv_control.txt")
+        if ("dissipative", "1e-06") in vals and ("pinned", "0.001") in vals:
+            ratio = vals[("dissipative", "1e-06")][1] / vals[("pinned", "0.001")][1]
+            OUT.append(("adv control: eps~0 recal vs pinned recal ratio ~1.0x",
+                        "adv_control.txt", f"{ratio:.3f}", "0.9-1.1",
+                        "OK" if 0.9 <= ratio <= 1.1 else "**MISMATCH**"))
+        m = re.search(r"1024\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[-\d.]+\s+([\d.]+)", adv)
+        if m:
+            check("adv control: no-input floor @1024 vs analytic 0.0700",
+                  float(m.group(1)), 0.0700, 0.02, "adv_control.txt")
+
+    # --- freeze probe (results/freeze_probe.txt) ---
+    fzp = R / "freeze_probe.txt"
+    if fzp.exists():
+        fz = fzp.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"sqrt\(v-hat\) ([\d.e-]+)", fz)
+        if m:
+            OUT.append(("freeze probe: sqrt(v-hat) below Adam eps=1e-8",
+                        "freeze_probe.txt", m.group(1), "<1e-8",
+                        "OK" if float(m.group(1)) < 1e-8 else "**MISMATCH**"))
+        OUT.append(("freeze probe verdict: eps-floor confirmed", "freeze_probe.txt",
+                    "present" if "EPS-FLOOR CONFIRMED" in fz else "absent", "present",
+                    "OK" if "EPS-FLOOR CONFIRMED" in fz else "**MISMATCH**"))
+
+    # --- forced-forgetting benchmark (results/L0_forget.txt), if complete ---
+    fgp = R / "L0_forget.txt"
+    if fgp.exists():
+        fg = fgp.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"improvement ([\d.]+)% \(criterion", fg)
+        if m:
+            OUT.append(("l0_forget Phase A: necessity criterion evaluated",
+                        "L0_forget.txt", f"{m.group(1)}% vs 20% required",
+                        "PASS or FAIL recorded",
+                        "OK" if ("PASS" in fg or "FAIL" in fg) else "**MISMATCH**"))
+
+    # --- dashboard RDATA arrays vs logs (figures/sliders render from these) ---
+    dash = Path("dashboard.html").read_text(encoding="utf-8", errors="replace")
+
+    def js_array(name):
+        m = re.search(name + r":\[([^\]]+)\]", dash)
+        return [float(x) for x in m.group(1).split(",")] if m else None
+
+    # landscape arrays vs results/L0_mechanism.txt table
+    land_rows = re.findall(r"^\s+([\d.]+e-\d+)\s+[\d.]+\s+([\d.]+)\s+([\d.]+)\s",
+                           land, re.M)
+    if land_rows and js_array("LTR"):
+        log_ltr = [float(r[1]) for r in land_rows][:22]
+        rd_ltr = js_array("LTR")
+        ok = all(abs(a - b) <= max(0.02 * abs(b), 5e-4)
+                 for a, b in zip(rd_ltr, log_ltr))
+        OUT.append(("RDATA.LTR matches landscape log (22 pts)", "dashboard vs "
+                    "L0_mechanism.txt", f"max|d|={max(abs(a-b) for a,b in zip(rd_ltr,log_ltr)):.2e}",
+                    "<=2%", "OK" if ok else "**MISMATCH**"))
+        log_lte = [float(r[2]) for r in land_rows][:22]
+        rd_lte = js_array("LTE")
+        ok = all(abs(a - b) <= 1.0 for a, b in zip(rd_lte, log_lte))
+        OUT.append(("RDATA.LTE matches landscape log (22 pts)", "dashboard vs "
+                    "L0_mechanism.txt", f"max|d|={max(abs(a-b) for a,b in zip(rd_lte,log_lte)):.2f}",
+                    "<=1.0 abs", "OK" if ok else "**MISMATCH**"))
+
+    # horizon arrays vs results_L0_seeds.txt 3-seed means (recomputed earlier
+    # as `cite`-checked frontier means -- here against the L0 seeds file)
+    seeds_txt = Path("results_L0_seeds.txt").read_text(encoding="utf-8",
+                                                       errors="replace")
+    sm = re.findall(r"^\s*(dissipative|conservative|pinned) \| "
+                    r"([\d.]+)\+-[\d.]+ ([\d.]+)\+-[\d.]+ ([\d.]+)\+-[\d.]+ "
+                    r"([\d.]+)\+-[\d.]+ ([\d.]+)\+-[\d.]+", seeds_txt, re.M)
+    if sm:
+        means = {r[0]: [float(x) for x in r[1:]] for r in sm}
+        hor = re.search(r"HOR:\{dissipative:\[([^\]]+)\],\s*conservative:\[([^\]]+)\],"
+                        r"\s*pinned:\[([^\]]+)\]", dash)
+        if hor:
+            for gi, name in [(1, "dissipative"), (2, "conservative"), (3, "pinned")]:
+                rd = [float(x) for x in hor.group(gi).split(",")]
+                lg = means[name]
+                ok = all(abs(a - b) <= 0.003 for a, b in zip(rd, lg))
+                OUT.append((f"RDATA.HOR.{name} matches seeds summary",
+                            "dashboard vs results_L0_seeds.txt",
+                            f"max|d|={max(abs(a-b) for a,b in zip(rd,lg)):.4f}",
+                            "<=0.003", "OK" if ok else "**MISMATCH**"))
+
+    # STATS arrays vs L0_stats.txt rows
+    stm = re.search(r'"name": ?"pinned", ?"skills": ?\[([^\]]+)\]', dash)
+    if stm:
+        rd = [float(x) for x in stm.group(1).split(",")]
+        ok = sorted(rd) == sorted(byarm["pinned"])
+        OUT.append(("RDATA.STATS pinned skills match log rows", "dashboard vs "
+                    "L0_stats.txt", f"{len(rd)} values", "identical multiset",
+                    "OK" if ok else "**MISMATCH**"))
 
     # --- write report ---
     lines = ["# Verification report", "",

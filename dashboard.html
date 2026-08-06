@@ -177,10 +177,10 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
 
 <div class="hero">
   <div class="stat"><b class="green">+1.000</b><span>pinned ledger skill @ 16&times; the training
-  horizon &mdash; every seed (learned-decay baselines: &minus;6)</span></div>
+  horizon &mdash; median over 10 seeds, minimum +0.999 (learned baselines: &minus;6)</span></div>
   <div class="stat"><b class="gold">89,222&times;</b><span>train-vs-test loss sensitivity gap in
   the sub-critical decay region &mdash; the measured mechanism</span></div>
-  <div class="stat"><b>29/29</b><span>quantitative claims recomputed from raw logs by an
+  <div class="stat"><b>58/58</b><span>quantitative claims recomputed from raw logs by an
   independent parser (<span class="mono">VERIFICATION.md</span>)</span></div>
   <div class="stat"><b class="red">3</b><span>of our own hypotheses refuted by our own probes
   &mdash; each replaced by a measured mechanism</span></div>
@@ -327,6 +327,22 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
   direction from that trade entirely.</span>
 </div>
 
+<div class="tl-item find">
+  <h3>L0-Forget &mdash; forgetting made provably necessary
+  <span class="pill p-part">FIRST SUPPORTING EVIDENCE &middot; n=3 PRELIMINARY</span></h3>
+  The audit exposed that no prior task actually forced forgetting, so "protect selectively"
+  vs "never decay anything" was untested. The redesigned task (content variance 1.0,
+  d<sub>in</sub>=n<sub>z</sub>=8) validates the tension first — Phase A, pre-stated criterion:
+  never-forgetting costs 13&times; on late content (median 3.53 vs 0.27 at strong decay;
+  92.4% improvement, needing &ge;20%: <b>PASS</b>). Phase B, pre-stated predictions: learned
+  decay converges onto the attractor and fails <i>both</i> axes (ledger &minus;4.9, content
+  23.7 — the attractor is also the content-worst point); frozen-zero scalar is
+  <b>unreliable</b> — 1/3 seeds lose the ledger to the rotation lottery the old task masked;
+  <b>pinned holds the ledger +1.000 on 3/3 seeds with content matching or beating the
+  freeze</b> (median 4.68 vs 4.86). The first data where hard selective protection beats the
+  trivial freeze — preliminary at n=3 (two-sided sign floor p=0.25); n=10 is queued.
+</div>
+
 </div>
 </div>
 
@@ -359,7 +375,7 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 </table>
 <p class="mut">Identical correlation everywhere: no information was ever lost. The gap was a
 deterministic scalar gain \(e^{-\varepsilon t}\) that the pinned mode was exempted from by
-construction.</p>
+construction. <b>Provenance (audit):</b> these control numbers originally had no saved log; the control was re-run into <span class="mono">results/adv_control.txt</span> — &epsilon;&asymp;0 recalibrated 0.0115 vs pinned 0.0116 (ratio 0.99&times;), fixed-&epsilon; raw 0.3386, no-input floor 0.0705 vs analytic 0.0700.</p>
 
 <h3>L0.5 anchor transport &mdash; absolute error, sparse (1 supervised horizon) vs dense (all)</h3>
 <table>
@@ -401,16 +417,15 @@ Trained at \(K{=}64\), evaluated at \(t{=}1024\). <b>Three seeds, mean&nbsp;&plu
 mode and seed. The SNR probe later showed this tight clustering is an <b>attractor of the
 training objective</b> (gradient pushes decay up from below, down from above), not inertia at the
 init — training <i>selects</i> the under-retaining rate.</p>
-<p><b>The gradient across modes is the finding.</b> Learned decay parks in a flat basin: any rate
-below \(\sim 1/K_{\text{train}}\) is invisible during training
-(\(e^{-7.8\times10^{-4}\cdot 64}\!\approx\!0.95\)) yet fatal at test
-(\(e^{-7.8\times10^{-4}\cdot 1024}\!\approx\!0.45\)); SGD gets no gradient signal to push it to
-zero. <code>diag</code> could represent the pinned solution and never found it. <code>ks</code>
-found the <i>direction</i> (0.98 aligned) but its residual leak still cost half its skill, and it
-paid on content. The hard constraint delivers exactly what optimization won't:
-<b>zero decay on the protected direction, aggressive forgetting (median decay 4.1) everywhere
-else — winning both axes.</b></p>
-<p class="mut">Scope honestly: one seed so far (two more in flight); a synthetic accumulation
+<p><b>The gradient across modes is the finding.</b> Learned decay converges to
+\(d^\*\approx 7{-}9\times10^{-4}\), which the landscape and SNR probes later identified as an
+<b>interior optimum of the short-horizon objective</b> — invisible over 64 training steps
+(\(e^{-7.8\times10^{-4}\cdot 64}\!\approx\!0.95\), absorbed by the learned gain) yet fatal at
+1024 (\(\approx\!0.45\)). <code>diag</code> could represent the pinned solution and converged
+to the attractor instead. <code>ks</code> found the <i>direction</i> (align 0.98) but kept the
+leak. The hard constraint delivers what the objective refuses to select: zero decay on the
+protected direction, aggressive forgetting (median decay 4.1) elsewhere.</p>
+<p class="mut">Scope honestly: three seeds (n=10 statistics in §4/Fig.&nbsp;1); a synthetic accumulation
 task, chosen because accumulation is the one thing a conserved ledger is <i>for</i> — the L1
 question is whether real-LM `count`-style tasks inherit the effect. Also note a real design issue
 surfaced: the unbounded accumulator direction drifts out of the decoder's training range at long
@@ -494,8 +509,8 @@ arrays as the sliders above — inline SVG, no chart library, view-source friend
   training horizon, 10 seeds per arm. Learned decay at standard init fails every seed
   (medians &minus;6.3 / &minus;5.7); soft K+S hovers near zero with failure seeds; the removal
   fixes and pinned sit at +1.0. Pinned beats every learned baseline <b>10/10 seeds
-  (sign-test p = 0.002)</b> and is statistically indistinguishable from the removal fixes
-  (p &ge; 0.34, with exact ties at +1.000) — but is the only arm whose IQR is degenerate at [+1.000, +1.000].</span></figcaption>
+  (sign-test p = 0.002)</b> with no detectable difference from the removal fixes at n=10
+  (sign p &ge; 0.34, Wilcoxon p = 0.064/0.131; no equivalence test) — but is the only arm whose IQR is degenerate at [+1.000, +1.000].</span></figcaption>
 </figure>
 <figure class="fig" id="fig2">
   <div class="fig-plot"></div>
@@ -510,7 +525,7 @@ arrays as the sliders above — inline SVG, no chart library, view-source friend
   <div class="fig-plot"></div>
   <figcaption><b>Fig. 3 — Training <i>actively</i> selects the attractor.</b> Signed mean
   training gradient across 64 minibatches (bar height: log scale). Gold bars push the decay
-  <i>up</i> toward \(d^\*\); blue bars push it back <i>down</i>. SNR is 8&ndash;11 throughout —
+  <i>up</i> toward \(d^\*\); blue bars push it back <i>down</i>. SNR is above 1 at every sampled decay (1.3&ndash;11.2; the 1.3 sits at \(d^\*\) where the mean gradient crosses zero) —
   Adam sees this parameter clearly and chooses the under-retaining rate. This refuted our own
   earlier "flat basin" hypothesis.</figcaption>
 </figure>
@@ -622,14 +637,14 @@ but it must first be shown to beat matched learned baselines, which it has not y
 <h2>Findings</h2>
 <p>Everything below survived (or emerged from) an adversarial audit that killed the project's own
 first headline result. Findings are stated with the strongest caveat we know. Status pills:
-<span class="pill p-find">REPLICATING</span> = holding across seeds in flight,
+<span class="pill p-find">SUPPORTED</span> = held across the completed n=10 statistics,
 <span class="pill p-fail">NEGATIVE</span> = something we disproved (ours or implied elsewhere),
 <span class="pill p-part">OBSERVATION</span> = real but scoped.</p>
 </div>
 
 <div class="fcard primary" id="f1">
 <h3>F1 &middot; Hard conservation substitutes for optimization pressure that short-horizon
-training cannot provide <span class="pill p-find" id="f1-pill">REPLICATING</span></h3>
+training cannot provide <span class="pill p-find" id="f1-pill">N=10 COMPLETE</span></h3>
 <dl class="frow">
 <dt>Claim</dt><dd><b>(Third revision — narrowed by our own rescue suite.)</b> Learned decay at
 practitioner-standard initialization converges to a horizon-myopic attractor and under-retains
@@ -643,8 +658,8 @@ matched pinned on the ledger and beat it on content on this task, because the ta
 not to require forgetting at all (see Caveats).</dd>
 <dt>Mechanism</dt><dd><b>Revised after the SNR probe refuted our first story.</b> We initially
 blamed a flat basin (no gradient signal below \(d\sim 1/K_{\text{train}}\)). Direct measurement
-says otherwise: gradient SNR across minibatches is 8&ndash;11 at <i>every</i> decay value — Adam
-sees the parameter fine. The signs reveal the real mechanism: for \(d \lesssim 5\times10^{-4}\)
+says otherwise: gradient SNR across minibatches is 1.3&ndash;11.2, above 1 at every sampled decay (the 1.3 is at \(d^\*\) itself, where the mean gradient crosses zero — expected at an optimum) — Adam
+sees the parameter fine. The signs reveal the real mechanism (measured on a single scalar-mode model, seed 0, along a post-hoc 1-D slice — generality across modes rests on the 12-run convergence, not on repeated probes): for \(d \lesssim 5\times10^{-4}\)
 the training gradient pushes decay <b>up</b>, above \(3\times10^{-3}\) it pushes decay
 <b>down</b> — the short-horizon objective has an <b>interior optimum</b> \(d^\*\!\approx\!
 7\times10^{-4}\) (mild forgetting cuts interference over 64 steps; the ledger cost
@@ -652,9 +667,11 @@ the training gradient pushes decay <b>up</b>, above \(3\times10^{-3}\) it pushes
 converged to exactly this attractor (6.7&ndash;9.0&times;10<sup>-4</sup>, all seeds). At
 \(K_{\text{test}}=16K_{\text{train}}\), that same optimum gives gain
 \(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) — catastrophic. <b>Training doesn't fail to find
-protection; it actively trades it away at the horizon it can see.</b> Consequence: no
-initialization can rescue the baselines (an attractor recaptures init-at-zero — prediction under
-test in the rescue suite). Only changing the objective (train at deployment length — expensive)
+protection; it actively trades it away at the horizon it can see.</b> Consequence, as revised by the rescue suite: a
+<i>reachable</i> initialization is pulled to the attractor, but init-at-zero under softplus was
+NOT recaptured — its gradients are suppressed (see freeze probe) and it rescues fully. So
+initialization <i>can</i> rescue, when it doubles as a freeze; what fails is soft pressure at
+reachable decay values. Only changing the objective (train at deployment length — expensive)
 or removing the ledger direction from the tradeoff structurally (\(C^\top W{=}0\)) escapes.</dd>
 <dt>Evidence</dt><dd id="f1-evidence">Frontier experiment, matched learned baselines, all audit
 fixes, <b>3/3 seeds</b>: scalar skill &minus;6.54&plusmn;0.21; diag &minus;6.12&plusmn;0.18 (0/3
@@ -664,12 +681,17 @@ exact zero decay and the best, most stable content (0.62&plusmn;0.10). Every lea
 at 6.7&ndash;9.0&times;10<sup>-4</sup> from init 10<sup>-3</sup>. Landscape scan: in the
 sub-critical region \(dK_{\text{train}}\!<\!0.1\), \(L_{\text{train}}\) varies 6,365&times; less
 than \(L_{\text{test}}\); single-batch gradient 237&times; weaker than super-critical.
-<b>n=10 statistics (final, pre-registered):</b> pinned beats every learned baseline
+<b>n=10 statistics (final):</b> pinned beats every learned baseline
 <b>10/10 seeds</b> (exact sign-test p = 0.00195; median skill differences +7.29 / +6.70 /
-+0.78); the removal fixes tie it (median diff +0.000&ndash;0.002, several exact ties at +1.000; sign-test p &ge; 0.34 — indistinguishable); pinned is
++0.78); the removal fixes show no detectable skill difference at n=10 (median diff +0.000&ndash;0.002; exact ties at +1.000; sign p &ge; 0.34, Wilcoxon p = 0.064/0.131; no equivalence test performed, and the skill metric saturates at +1); pinned is
 the only arm whose IQR is degenerate at [+1.000,&nbsp;+1.000] — see Fig.&nbsp;1.
-<span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 8&ndash;11 at all
-decay values, gradient sign flips around \(d^\*\approx 7\times10^{-4}\), confirming an interior
+<span class="mut">Pre-registration provenance: the four original comparisons are committed
+before any stats data existed (commit 9d4cccc); the two scalar0 tests were specified at run
+start, committed alongside only the first scalar row. Note also that stats seeds 0&ndash;2
+replicate frontier runs whose outcomes were already known; the strictly-fresh evidence is seeds
+3&ndash;9, where pinned still wins 7/7 vs every learned baseline (sign p = 0.0156).</span>
+<span id="f1-snr"><b>SNR probe (done):</b> refuted the flat-basin variant — SNR 1.3&ndash;11.2 — above 1 at every sampled decay, dipping to 1.3 at \(d^\*\) itself where the mean gradient crosses zero (expected at an optimum) at all
+sampled values, gradient sign flips around \(d^\*\approx 7\times10^{-4}\), confirming an interior
 attractor of the training objective, which is where all 12 learned runs converged.
 <b>Rescue suite (done, 2 seeds/arm):</b></span>
 <table>
@@ -688,22 +710,35 @@ attractor of the training objective, which is where all 12 learned runs converge
 <td class="green">exact + auditable</td></tr>
 </table>
 <span class="mut">Note my failed prediction, for the record: I predicted init0's decay would
-drift back up to the attractor. It did not — softplus's vanishing gradient at zero makes init0
-a de-facto freeze, i.e. a parameterization-level removal fix.</span></dd>
+drift back up to the attractor. It did not. Mechanism, stated precisely: at
+\(s{=}-20\), softplus scales gradients by \(\sigma(-20)\approx 2\times10^{-9}\), which puts
+them below Adam's \(\epsilon = 10^{-8}\) denominator floor, so update sizes collapse
+(&sim;10<sup>-2</sup> total drift in s over 3000 steps — softplus value unchanged). Under Adam
+it is the \(\epsilon\) floor, not the small gradient per se, that makes init0 a de-facto
+freeze; with a different optimizer or \(\epsilon\), init0 might not freeze. <b>Now measured</b> (<span class="mono">results/freeze_probe.txt</span>): median |dL/d(raw)| = 2.1&times;10<sup>-9</sup>, sqrt(v-hat) = 2.7&times;10<sup>-9</sup> &lt; Adam &epsilon; = 10<sup>-8</sup>, median step 5&times;10<sup>-5</sup> (60&times; below sign-following), extrapolated &sim;260k steps to reach the attractor vs the 3,000-step budget. Optimizer-dependence caveat stands: under SGD or a smaller &epsilon; this freeze may not hold.</span></dd>
 <dt>Significance</dt><dd>It reframes what structure is <i>for</i>: not expressivity (the baselines
 could express the solution) but <b>reliability of optimization under train-short/test-long</b> —
 which is the universal regime of LLM memory (trained on 4–16k, deployed on 100k+). Concrete
 falsifiable prediction: learned-&lambda; latent memories (e.g. IndexMem's
 \(M\!\leftarrow\!\lambda M + \eta\sum\!\text{Lin}(k)\otimes v^\top\)) under-retain beyond their
 training length, and pinning a supervised subspace fixes it without retraining tricks.</dd>
-<dt>Caveats</dt><dd><b>The capacity-pressure premise failed empirically:</b> the task was
+<dt>Caveats</dt><dd><b>Update (l0_forget):</b> the missing tension has now been built and
+validated — on a task where forgetting is provably necessary (Phase A PASS, 92.4%), pinned
+uniquely holds both axes while the frozen-zero fix loses the ledger on 1/3 seeds
+(results/L0_forget.txt; n=3, preliminary). The original caveat below stands for every result
+above this line. <b>The capacity-pressure premise of the frontier task failed empirically:</b> the task was
 designed so never-forgetting would fail on content via interference — it doesn't (frozen-zero
 decay has the <i>best</i> content). So this task cannot distinguish "protect selectively" from
 "never decay anything", and pinned's selective-forgetting advantage is <b>unsupported by current
 data</b> — a task where forgetting is provably necessary is now T1 priority #1. Also: synthetic
 accumulation family only (n=10 statistics complete); one scale (\(n_z{=}8\)); the constraint helps only
 quantities you can name and supervise a flux for. Pinned's remaining unique value: machine-exact
-conservation, the auditable balance law, and guarantees no init trick provides.</dd>
+conservation, the auditable balance law, and guarantees no init trick provides.
+<span class="mut">Parameter accounting (audit): live generator+readout params are scalar 75 /
+diag 82 / ks 139 / pinned 139 (enc+dec &asymp;13.6k dominate, identical everywhere). ks is
+exactly matched to pinned; scalar/diag are lighter — but their frozen variants (same params)
+reach +1.0, so capacity does not explain the retention gap. The clean capacity-controlled
+contrasts are diag&rarr;diag0 and scalar&rarr;scalar0.</span></dd>
 </dl>
 <div class="prov"><span class="prov-label">Provenance</span>
 <a class="xref" onclick="return goto('page-log','sec-results')">§4 frontier table</a>
@@ -835,7 +870,7 @@ init-sensitivity footnote. This must be tried <i>before</i> claiming novelty.</l
 <div class="card" style="border-left:3px solid var(--gold)">
 <h2>Most promising, ranked</h2>
 <p>Ranked by evidence quality &times; generality &times; testability — not by how much we like
-them. Ranking as of the n=10 statistics run; the LIVE strip above tracks it.</p>
+them. Ranking as of the completed n=10 statistics.</p>
 </div>
 
 <div class="fcard primary" id="p1">
@@ -850,7 +885,7 @@ cuts interference over the visible horizon while its retention cost
 (\(e^{-d^\*K_{\text{train}}}\!\approx\!0.95\)) is absorbed by a learned gain. At deployment
 horizon that same optimum gives gain \(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) —
 catastrophic. Measured two independent ways: the landscape scan's train-loss minimum with a
-gradient zero-crossing at \(d^\*\), and the SNR probe's sign structure (SNR 8&ndash;11
+gradient zero-crossing at \(d^\*\), and the SNR probe's sign structure (SNR &gt; 1 at every sampled decay, 1.3&ndash;11.2
 everywhere: Adam sees the parameter fine and <i>chooses</i> the attractor).</dd>
 <dt>Why #1</dt><dd>(i) <b>Evidence profile:</b> all 12 learned runs across three
 parameterizations converged onto the attractor; the claim survived three of our own refutation
@@ -886,8 +921,11 @@ protected content obeys \(C^\top z_t = C^\top z_s + \sum_k C^\top g_k\) exactly
 (3.2&times;10&#8315;&sup1;&sup3;, no loss term). The ledger changes only by explicit, logged
 fluxes — an accounting property no attention window or learned-decay memory has. Its
 compatibility defect doubles as an online staleness alarm.</dd>
-<dt>Honest status</dt><dd>No demonstrated empirical advantage over the frozen-zero fix on
-current tasks (our benchmark never forced forgetting — F1 caveats). Its value proposition is
+<dt>Honest status</dt><dd><b>Updated:</b> first supporting evidence landed
+(l0_forget, n=3): with forgetting provably necessary, pinned holds the ledger 3/3 seeds
+while frozen-zero drops it 1/3 — selective protection now shows a measurable edge in
+reliability. Prior status, still true for the frontier-task family: no demonstrated
+advantage over the frozen-zero fix (our benchmark never forced forgetting — F1 caveats). Its value proposition is
 exactness + auditability + selective protection <i>when forgetting is provably necessary</i>,
 which the next benchmark must instantiate. Long-term, this is the piece the physics-scratchpad
 branch (T3) builds on.</dd>
@@ -910,7 +948,7 @@ these controls. Everything else on this page is believable <i>because</i> of thi
 <div class="prov"><span class="prov-label">Provenance</span>
 <a class="xref" onclick="return goto('page-findings','f2')">Finding F2</a>
 <a class="xref" onclick="return goto('page-log','sec-failures')">§5 failure ledger</a>
-<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (29/29)</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (58/58)</a>
 </div>
 </div>
 
@@ -955,7 +993,7 @@ in §5: <i>every tier includes its own falsification attempt before its claims a
 <dl class="frow">
 <dt>SNR probe</dt><dd><code>l0_snr.py</code> <span class="pill p-find">DONE — took the "fail"
 branch, productively</span><br>
-SNR measured 8&ndash;11 at every decay value: the flat-basin story was <b>wrong</b>. But the
+SNR measured 1.3&ndash;11.2 (above 1 at every sampled decay; the 1.3 dip is at \(d^\*\), the gradient's zero-crossing): the flat-basin story was <b>wrong</b>. But the
 gradient's <i>sign structure</i> revealed the true mechanism — an interior optimum
 \(d^\*\approx 7\times10^{-4}\) of the short-horizon objective that every learned run converged
 to. F1's mechanism row was rewritten from "no gradient signal" to "the objective actively
@@ -989,8 +1027,8 @@ training range) is a design bug to fix <i>before</i> L1: pin rates/means
 (\(C^\top z \approx \frac1t\sum\)flux, via a time-conditioned readout) instead of raw sums, or
 add a norm-bounded companion coordinate. One day; unblocks everything downstream.</li>
 <li><b>Statistics the audit demanded.</b> 10+ seeds on the frontier, medians + paired
-Wilcoxon, plus an \(\varepsilon\)-sweep tracing the fixed-decay Pareto front. n=3 has a
-significance floor of p=0.125 — currently our biggest formal weakness. Overnight run.</li>
+Wilcoxon, plus an \(\varepsilon\)-sweep tracing the fixed-decay Pareto front. n=3 has a two-sided
+sign-test floor of p=0.25 — currently our biggest formal weakness. Overnight run.</li>
 <li><b>Task generality scan.</b> F1 is shown for pure accumulation. Sweep tasks whose labels are
 NOT integrals: max-so-far, latest-value (the `update` semantics), conditional count, decaying
 average. Prediction: pinning helps exactly when the target is a conserved functional of the
@@ -1012,7 +1050,7 @@ items 2–3 are cancelled in favor of T3.</li>
 <a class="xref" onclick="return goto('page-findings','f5')">F5 (bounded encodings)</a>
 <a class="xref file" href="data/haystack.py" target="_blank">data/haystack.py</a>
 <a class="xref file" href="precompute_states.py" target="_blank">precompute_states.py</a>
-<a class="xref file" href="l0_stats.py" target="_blank">l0_stats.py (n=10, running)</a>
+<a class="xref file" href="l0_stats.py" target="_blank">l0_stats.py (n=10, complete)</a>
 </div>
 </div>
 
@@ -1108,7 +1146,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 
 <footer>
   <span>Latent Twin Memory &middot; independent research project &middot; Aug 2026</span>
-  <span>29/29 claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
+  <span>58/58 claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
   full provenance in git history &middot; single RTX 3060 (6 GB)</span>
 </footer>
 
@@ -1322,7 +1360,7 @@ decades(1e-6,0.6).forEach(d=>{E('line',{x1:X(d),y1:m.t,x2:X(d),y2:H-m.b,
 decades(1e-3,40).forEach(d=>txt(s,m.l-6,YL(d)+3,fmtPow(d),C.gold,9,'end'));
 [6000,7000,8000,9000].forEach(v=>txt(s,W-m.r+6,YR(v)+3,String(v),C.blue,9));
 /* reference verticals */
-[[9.68e-4,C.gold,'d* = 9.7e-4 — SGD converged here'],
+[[9.68e-4,C.gold,'train minimum 9.7e-4 (SGD converged to 7.75e-4)'],
  [1/64,C.mut,'1/K_train']].forEach(([v,col,lab])=>{
   E('line',{x1:X(v),y1:m.t,x2:X(v),y2:H-m.b,stroke:col,'stroke-width':1,
     'stroke-dasharray':'4 3',opacity:.75},s);

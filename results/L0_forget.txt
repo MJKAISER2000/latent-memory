@@ -1,0 +1,50 @@
+PHASE A -- necessity validation. Fixed decay grid [0.0, 0.001, 0.01, 0.1, 1.0], 3 seeds.
+Pre-stated criterion: median content-late at best d>0 must be >=20% below d=0.
+
+  s0 d=0       con_late=8.5991 con_early=0.9668 skill@1024=+0.931 (58s)
+  s0 d=0.001   con_late=17.9648 con_early=0.9628 skill@1024=-6.135 (73s)
+  s0 d=0.01    con_late=5.5677 con_early=0.9418 skill@1024=-5.645 (69s)
+  s0 d=0.1     con_late=1.0142 con_early=0.9844 skill@1024=-5.847 (65s)
+  s0 d=1       con_late=0.2690 con_early=0.2685 skill@1024=-6.179 (84s)
+  s1 d=0       con_late=1.6500 con_early=1.0209 skill@1024=-5.296 (65s)
+  s1 d=0.001   con_late=36.5684 con_early=0.9942 skill@1024=-3.909 (79s)
+  s1 d=0.01    con_late=5.4891 con_early=0.9820 skill@1024=-5.827 (60s)
+  s1 d=0.1     con_late=0.9923 con_early=1.0303 skill@1024=-6.119 (63s)
+  s1 d=1       con_late=0.1913 con_early=0.2031 skill@1024=-6.445 (64s)
+  s2 d=0       con_late=3.5250 con_early=0.9690 skill@1024=+0.999 (63s)
+  s2 d=0.001   con_late=14.4584 con_early=0.9585 skill@1024=-4.387 (66s)
+  s2 d=0.01    con_late=4.9530 con_early=0.9498 skill@1024=-5.463 (64s)
+  s2 d=0.1     con_late=0.9598 con_early=0.9839 skill@1024=-5.776 (65s)
+  s2 d=1       con_late=0.3075 con_early=0.3069 skill@1024=-6.088 (65s)
+
+       d  con_late med  con_early med  skill@1024 med
+       0        3.5250         0.9690          +0.931
+   0.001       17.9648         0.9628          -4.387
+    0.01        5.4891         0.9498          -5.645
+     0.1        0.9923         0.9844          -5.847
+       1        0.2690         0.2685          -6.179
+
+NECESSITY: content-late d=0: 3.5250  best d>0 (1): 0.2690  improvement 92.4% (criterion >=20%) -> PASS - forgetting is necessary on this task
+
+PHASE B -- the decisive comparison. arms=scalar/scalar0/pinned, seeds=[0, 1, 2]
+
+  s0   scalar: skill@1024=-0.960 con_late=23.0019 decay_min=8.82e-04 (66s)
+  s0  scalar0: skill@1024=+0.970 con_late=15.0319 decay_min=2.20e-09 (65s)
+  s0   pinned: skill@1024=+1.000 con_late=4.6790 decay_min=6.09e-08 (71s)
+  s1   scalar: skill@1024=-4.917 con_late=42.1536 decay_min=1.00e-03 (65s)
+  s1  scalar0: skill@1024=-6.259 con_late=2.4308 decay_min=2.19e-09 (88s)
+  s1   pinned: skill@1024=+1.000 con_late=1.6196 decay_min=-1.09e-07 (95s)
+  s2   scalar: skill@1024=-5.903 con_late=23.7089 decay_min=9.64e-04 (89s)
+  s2  scalar0: skill@1024=+0.992 con_late=4.8611 decay_min=2.15e-09 (83s)
+  s2   pinned: skill@1024=+1.000 con_late=8.8391 decay_min=-1.86e-08 (102s)
+
+      arm |  ledger skill@1024 med |  content late med
+   scalar |                 -4.917 |           23.7089
+  scalar0 |                 +0.970 |            4.8611
+   pinned |                 +1.000 |            4.6790
+
+READING (pre-stated predictions; any other outcome falsifies that row)
+  scalar : attractor -> ledger dies, content ok
+  scalar0: no forgetting -> ledger holds, content dies (if Phase A was honest)
+  pinned : ledger holds AND content survives -> the first data actually
+           supporting selective protection over never-forgetting

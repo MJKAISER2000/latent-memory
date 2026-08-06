@@ -14,6 +14,7 @@
 #
 # Usage:  sbatch scripts/job.sbatch <stage>
 #   stages: selftest | l0 | seeds | data | precompute
+#           | frontier | mechanism | snr | stats | forget   (live-claim track)
 #
 # The whole point of precompute is that it runs ONCE on the cluster and the
 # resulting cache/*.pt transfers back to any machine. Memory-module training
@@ -63,6 +64,26 @@ case "$STAGE" in
         --chunk 4096 \
         --context-mode local
     done
+    ;;
+
+  frontier)
+    python -u l0_frontier.py | tee "results/L0_frontier_${SLURM_JOB_ID:-local}.txt"
+    ;;
+
+  mechanism)
+    python -u l0_mechanism.py | tee "results/L0_mechanism_${SLURM_JOB_ID:-local}.txt"
+    ;;
+
+  snr)
+    python -u l0_snr.py | tee "results/L0_snr_${SLURM_JOB_ID:-local}.txt"
+    ;;
+
+  stats)
+    python -u l0_stats.py | tee "results/L0_stats_${SLURM_JOB_ID:-local}.txt"
+    ;;
+
+  forget)
+    python -u l0_forget.py | tee "results/L0_forget_${SLURM_JOB_ID:-local}.txt"
     ;;
 
   *)
