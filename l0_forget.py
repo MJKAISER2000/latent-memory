@@ -79,6 +79,12 @@ class Gen(nn.Module):
         self.B = nn.Parameter(torch.randn(n_z, n_z) * b)
         raw = softplus_inv(DECAY_INIT) if mode != "scalar0" else -20.0
         self.s = nn.Parameter(torch.tensor(raw))
+        # hardening addition (n=10 run): per-dim decay for the diag0 arm.
+        # torch.full consumes NO rng, so the seeded init streams of the
+        # original arms are bit-identical to the committed Phase A/B runs
+        # (verified by re-running scalar s0 before the n=10 sweep).
+        raw_d = -20.0 if mode == "diag0" else softplus_inv(DECAY_INIT)
+        self.d = nn.Parameter(torch.full((n_z,), raw_d))
         if mode == "fixed":
             self.register_buffer("fixed_d", torch.tensor(float(fixed_d)))
         if mode == "pinned":
@@ -94,6 +100,10 @@ class Gen(nn.Module):
             return K - self.fixed_d * I
         if self.mode in ("scalar", "scalar0"):
             return K - F.softplus(self.s) * I
+        if self.mode == "diag0":
+            return K - torch.diag(F.softplus(self.d))
+        if self.mode == "ks":
+            return K - self.B @ self.B.T - F.softplus(self.s) * I
         C = self.pinned_basis()
         P = I - C @ C.T
         PB = P @ self.B
