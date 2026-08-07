@@ -226,6 +226,50 @@ def main():
                         "PASS or FAIL recorded",
                         "OK" if ("PASS" in fg or "FAIL" in fg) else "**MISMATCH**"))
 
+    # --- hardening: n=10 forget benchmark ---
+    n10p = R / "L0_forget_n10.txt"
+    if n10p.exists():
+        n10 = n10p.read_text(encoding="utf-8", errors="replace")
+        OUT.append(("n10 guard: bit-exact reproduction of committed scalar s0",
+                    "L0_forget_n10.txt",
+                    "passed" if "guard passed" in n10 else "FAILED", "passed",
+                    "OK" if "guard passed" in n10 else "**MISMATCH**"))
+        m = re.search(r"pinned \|\s+\+1\.000 \[\+1\.000,\+1\.000\][^|]*\|[^|]*\|\s+(\d+)/10", n10)
+        OUT.append(("n10: pinned +1.000 [1.000,1.000], holds 10/10",
+                    "L0_forget_n10.txt", m.group(1) + "/10" if m else "not found",
+                    "10/10", "OK" if (m and m.group(1) == "10") else "**MISMATCH**"))
+        wins = re.findall(r"pinned vs\s+(\w+) on skill_1024: wins (\d+)/10.*?p=([\d.e-]+)", n10)
+        exp_w = {"scalar": "10", "scalar0": "9", "diag0": "10", "ks": "10"}
+        ok = all(exp_w.get(a) == w for a, w, _ in wins) and len(wins) == 4
+        OUT.append(("n10 paired ledger wins vs pinned: 10/9/10/10",
+                    "L0_forget_n10.txt",
+                    ",".join(f"{a}:{w}" for a, w, _ in wins), "10,9,10,10",
+                    "OK" if ok else "**MISMATCH**"))
+
+    # --- hardening: rescue statistics ---
+    rsp = R / "rescue_stats.txt"
+    if rsp.exists():
+        rs = rsp.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"reg lam=30: skill med \+([\d.]+).*rescued\(skill>0\): (\d)/3", rs)
+        OUT.append(("rescue: lambda=30 rescues 3/3 (med +0.95)", "rescue_stats.txt",
+                    f"med +{m.group(1)}, {m.group(2)}/3" if m else "not found",
+                    "3/3, ~0.95",
+                    "OK" if (m and m.group(2) == "3") else "**MISMATCH**"))
+        m = re.search(r"long n=5:.*rescued\(skill>0\): (\d)/5", rs)
+        OUT.append(("rescue: 3x budget rescues 2/5 (unreliable)", "rescue_stats.txt",
+                    f"{m.group(1)}/5" if m else "not found", "2/5",
+                    "OK" if (m and m.group(1) == "2") else "**MISMATCH**"))
+
+    # --- hardening: d* scaling sweep ---
+    scp = R / "scaling_dstar.txt"
+    if scp.exists():
+        sc = scp.read_text(encoding="utf-8", errors="replace")
+        m = re.search(r"spread across a 8x horizon range: ([\d.]+)x", sc)
+        OUT.append(("scaling: d*.K spread 5.6x (> pre-stated 4x -> 1/K refuted)",
+                    "scaling_dstar.txt", m.group(1) + "x" if m else "not found",
+                    "5.60x", "OK" if (m and abs(float(m.group(1)) - 5.6) < 0.1)
+                    else "**MISMATCH**"))
+
     # --- dashboard RDATA arrays vs logs (figures/sliders render from these) ---
     dash = Path("dashboard.html").read_text(encoding="utf-8", errors="replace")
 

@@ -3,20 +3,22 @@
 **Why do learned long-context memories forget? Because training tells them to.**
 An independent research project: transplanting structure-preserving latent dynamics
 (Chung, Bu & Verma, *Physics-Conforming Latent Twins*, arXiv:2606.15053) into LLM context
-memory — and, along the way, measuring a training-horizon attractor that makes *any*
-learned-decay memory under-retain beyond its training length.
+memory — and, along the way, measuring an attractor in the training objective that makes
+learned-decay memories (at practitioner-default settings) under-retain far beyond their
+training length, at every training horizon we tested.
 
 **Start here → open [`dashboard.html`](dashboard.html) in a browser.** Four tabs: the full
 research log (with interactive data sliders and an animated traditional-context vs
 latent-memory comparison), findings with per-claim provenance links, a ranked
 "most promising" page, and the roadmap. Every quantitative claim is recomputed from raw
-logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (58/58).
+logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (64/64).
 
 Headline (toy-scale, honestly scoped; n=10, pre-registered superiority tests all
 p = 0.002): the short-horizon training objective has an
 **interior optimum** for the decay rate — invisible over the training horizon
-(`e^{−d*·64} ≈ 0.95`), catastrophic at 16× it (`≈ 0.45`). Soft fixes lose to the attractor;
-removal fixes (a frozen parameter, or the `CᵀW = 0` projection below) restore full skill.
+(`e^{−d*·64} ≈ 0.95`), catastrophic at 16× it (`≈ 0.45`). What fails is the practitioner default; any mechanism pinning effective
+decay at zero — a frozen parameter, the `CᵀW = 0` projection below, or sufficiently strong
+regularization — restores full skill (moderate pressure and extra budget do not, reliably).
 The project's own first headline result was an artifact — caught by our adversarial audit,
 retracted, and documented in full as a case study (§5 of the dashboard).
 

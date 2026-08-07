@@ -76,6 +76,9 @@ def run_table():
     add("Retraction control (regenerated)", "adv_control.txt", "pinned(e=0.001)   1024")
     add("Freeze probe", "freeze_probe.txt", "VERDICT")
     add("L0-Forget (necessity + arms)", "L0_forget.txt", "READING")
+    add("L0-Forget n=10 (5 arms)", "L0_forget_n10.txt", "PAIRED TESTS")
+    add("Rescue statistics", "rescue_stats.txt", "VERDICT INPUTS")
+    add("d* scaling sweep", "scaling_dstar.txt", "READING")
     add("Verification pass", "VERIFICATION.md", "claims verified")
     st = parse_stats()
     runs.append({"name": "n=10 statistics (6 arms)",

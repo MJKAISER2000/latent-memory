@@ -182,7 +182,7 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
   horizon &mdash; median over 10 seeds, minimum +0.999 (learned baselines: &minus;6)</span></div>
   <div class="stat"><b class="gold">89,222&times;</b><span>train-vs-test loss sensitivity gap in
   the sub-critical decay region &mdash; the measured mechanism</span></div>
-  <div class="stat"><b id="verif-hero">58/58</b><span>quantitative claims recomputed from raw logs by an
+  <div class="stat"><b id="verif-hero">64/64</b><span>quantitative claims recomputed from raw logs by an
   independent parser (<span class="mono">VERIFICATION.md</span>)</span></div>
   <div class="stat"><b class="red">3</b><span>of our own hypotheses refuted by our own probes
   &mdash; each replaced by a measured mechanism</span></div>
@@ -341,8 +341,13 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
   23.7 — the attractor is also the content-worst point); frozen-zero scalar is
   <b>unreliable</b> — 1/3 seeds lose the ledger to the rotation lottery the old task masked;
   <b>pinned holds the ledger +1.000 on 3/3 seeds with content matching or beating the
-  freeze</b> (median 4.68 vs 4.86). The first data where hard selective protection beats the
-  trivial freeze — preliminary at n=3 (two-sided sign floor p=0.25); n=10 is queued.
+  freeze</b> (median 4.68 vs 4.86). <b>Hardened at n=10, 5 arms
+  (results/L0_forget_n10.txt):</b> pinned is the only arm at +1.000 [IQR 1.000,1.000], holds
+  10/10 (freezes: 9/10 at 0.97&ndash;0.99), and wins the pre-registered paired ledger tests
+  against every alternative — 10/10 vs scalar/diag0/ks (p=0.002), 9/10 vs scalar0 (p=0.021).
+  Content differences are not significant (pinned 8/10 vs freezes, p&ge;0.11; ks trades
+  ledger for content). Selective protection now has statistically supported evidence on a
+  forgetting-validated task.
 </div>
 
 </div>
@@ -544,10 +549,11 @@ arrays as the sliders above — inline SVG, no chart library, view-source friend
 <figure class="fig" id="fig5">
   <div class="fig-plot"></div>
   <figcaption><b>Fig. 5 — Soft fixes fail; removal fixes work.</b> Ledger skill by rescue arm
-  (2 seeds each). Regularizing the decay toward zero loses the tug-of-war with the attractor
-  (&minus;4.0, unstable); tripled training budget does not escape it; freezing the decay at zero
-  (init0) or projecting it out (\(C^\top W{=}0\)) restores full skill. Retention must be made
-  <i>non-tradeable</i> — pressure is not enough.</figcaption>
+  (2 seeds each). Moderate regularization loses to the attractor
+  (&minus;4.0, unstable) and tripled budget rescues only 2/5 — but the hardening &lambda;-sweep
+  showed overwhelming pressure (&lambda;=30) does rescue 3/3. Freezing the decay (init0) or
+  projecting it out restores full skill. The stable conclusion: the effective decay of the
+  retained direction must end up at zero; mild pressure is not enough.</figcaption>
 </figure>
 
 <div class="prov"><span class="prov-label">Data</span>
@@ -650,11 +656,12 @@ training cannot provide <span class="pill p-find" id="f1-pill">N=10 COMPLETE</sp
 <dl class="frow">
 <dt>Claim</dt><dd><b>(Third revision — narrowed by our own rescue suite.)</b> Learned decay at
 practitioner-standard initialization converges to a horizon-myopic attractor and under-retains
-catastrophically beyond the training horizon. <b>Soft fixes fail; removal fixes work:</b>
-explicit regularization toward zero decay loses the tug-of-war with the objective
-(skill &minus;4.0&nbsp;&plusmn;&nbsp;2.5), while <i>removing retention from the objective's
-reach</i> — by hard projection (\(C^\top W{=}0\), exact + auditable) or by freezing decay at
-zero (softplus init0; the parameterization gradient vanishes there) — restores full skill.
+catastrophically beyond the training horizon. <b>Revised by the hardening runs: what fails is the practitioner default, and any
+mechanism that pins effective decay at zero fixes it.</b> Moderate regularization loses the
+tug-of-war (&lambda;=0.3/3: 0/6 rescued) and 3&times; budget is unreliable (2/5), but
+overwhelming regularization wins (&lambda;=30: 3/3, skill +0.95) — as do freezing the decay at
+zero (init0) and the hard projection \(C^\top W{=}0\) (exact + auditable). The earlier
+"soft fixes fail" verdict was an artifact of testing a single &lambda;.
 What we can <b>not</b> claim: that hard structure uniquely wins — frozen-zero scalar decay
 matched pinned on the ledger and beat it on content on this task, because the task turned out
 not to require forgetting at all (see Caveats).</dd>
@@ -669,7 +676,14 @@ the training gradient pushes decay <b>up</b>, above \(3\times10^{-3}\) it pushes
 converged to exactly this attractor (6.7&ndash;9.0&times;10<sup>-4</sup>, all seeds). At
 \(K_{\text{test}}=16K_{\text{train}}\), that same optimum gives gain
 \(e^{-d^\*K_{\text{test}}}\!\approx\!0.45\) — catastrophic. <b>Training doesn't fail to find
-protection; it actively trades it away at the horizon it can see.</b> Consequence, as revised by the rescue suite: a
+protection; it actively trades it away at the horizon it can see.</b>
+<b>Scaling sweep (hardening, pre-registered threshold):</b> d* does NOT track
+1/K<sub>train</sub> — over K&isin;[32,256] the learned d* stays at
+0.75&ndash;1.1&times;10<sup>-3</sup> (d*&middot;K spread 5.6&times;, threshold &gt;4&times; =
+refuted), so the attractor's <i>location</i> appears anchored to init/task scales, not the
+horizon; what is horizon-robust is the <i>consequence</i> — under-retention at 16&times;K at
+every K tested (skill &minus;2.8 to &minus;6.7). Init=10<sup>-3</sup> confound: this sweep
+cannot separate init-anchored from task-anchored. Consequence, as revised by the rescue suite: a
 <i>reachable</i> initialization is pulled to the attractor, but init-at-zero under softplus was
 NOT recaptured — its gradients are suppressed (see freeze probe) and it rescues fully. So
 initialization <i>can</i> rescue, when it doubles as a freeze; what fails is soft pressure at
@@ -950,7 +964,7 @@ these controls. Everything else on this page is believable <i>because</i> of thi
 <div class="prov"><span class="prov-label">Provenance</span>
 <a class="xref" onclick="return goto('page-findings','f2')">Finding F2</a>
 <a class="xref" onclick="return goto('page-log','sec-failures')">§5 failure ledger</a>
-<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (58/58)</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (64/64)</a>
 </div>
 </div>
 
@@ -1148,7 +1162,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 
 <footer>
   <span>Latent Twin Memory &middot; independent research project &middot; Aug 2026</span>
-  <span><span id="verif-footer">58/58</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
+  <span><span id="verif-footer">64/64</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
   full provenance in git history &middot; single RTX 3060 (6 GB)</span>
 </footer>
 

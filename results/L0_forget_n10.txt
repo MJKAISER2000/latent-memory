@@ -1,1 +1,73 @@
 GUARD: reproduce committed scalar s0 before sweeping...
+  got skill=-0.960 con_late=23.0019  expected -0.960/23.0019
+  guard passed (bit-exact at printed precision)
+
+  s0   scalar: skill@1024=-0.960 con_late=23.0019 decay_min=8.82e-04 (81s)
+  s0  scalar0: skill@1024=+0.970 con_late=15.0319 decay_min=2.20e-09 (85s)
+  s0    diag0: skill@1024=+0.999 con_late=8.1543 decay_min=2.08e-09 (86s)
+  s0       ks: skill@1024=+0.407 con_late=1.0816 decay_min=7.13e-04 (89s)
+  s0   pinned: skill@1024=+1.000 con_late=4.6790 decay_min=6.09e-08 (92s)
+  s1   scalar: skill@1024=-4.917 con_late=42.1536 decay_min=1.00e-03 (86s)
+  s1  scalar0: skill@1024=-6.259 con_late=2.4308 decay_min=2.19e-09 (82s)
+  s1    diag0: skill@1024=-6.113 con_late=20.0264 decay_min=2.07e-09 (76s)
+  s1       ks: skill@1024=+0.293 con_late=1.4446 decay_min=7.96e-04 (57s)
+  s1   pinned: skill@1024=+1.000 con_late=1.6196 decay_min=-1.09e-07 (59s)
+  s2   scalar: skill@1024=-5.903 con_late=23.7089 decay_min=9.64e-04 (55s)
+  s2  scalar0: skill@1024=+0.992 con_late=4.8611 decay_min=2.15e-09 (55s)
+  s2    diag0: skill@1024=+0.999 con_late=7.0498 decay_min=2.07e-09 (79s)
+  s2       ks: skill@1024=+0.005 con_late=7.9855 decay_min=8.62e-04 (92s)
+  s2   pinned: skill@1024=+1.000 con_late=8.8391 decay_min=-1.86e-08 (92s)
+  s3   scalar: skill@1024=+0.299 con_late=2.2844 decay_min=8.56e-04 (85s)
+  s3  scalar0: skill@1024=+0.987 con_late=10.3005 decay_min=2.22e-09 (91s)
+  s3    diag0: skill@1024=+0.959 con_late=3.9181 decay_min=2.08e-09 (88s)
+  s3       ks: skill@1024=+0.402 con_late=2.4411 decay_min=7.23e-04 (89s)
+  s3   pinned: skill@1024=+1.000 con_late=5.9593 decay_min=1.37e-08 (91s)
+  s4   scalar: skill@1024=-5.682 con_late=40.3341 decay_min=1.03e-03 (86s)
+  s4  scalar0: skill@1024=+0.994 con_late=6.4253 decay_min=2.21e-09 (64s)
+  s4    diag0: skill@1024=+0.986 con_late=8.9121 decay_min=2.07e-09 (54s)
+  s4       ks: skill@1024=+0.330 con_late=4.7989 decay_min=7.71e-04 (55s)
+  s4   pinned: skill@1024=+1.000 con_late=7.2281 decay_min=-1.84e-09 (58s)
+  s5   scalar: skill@1024=-6.079 con_late=30.1182 decay_min=1.04e-03 (53s)
+  s5  scalar0: skill@1024=+0.451 con_late=73.3147 decay_min=2.21e-09 (53s)
+  s5    diag0: skill@1024=+0.930 con_late=71.9099 decay_min=2.08e-09 (52s)
+  s5       ks: skill@1024=-1.832 con_late=51.3983 decay_min=8.96e-04 (65s)
+  s5   pinned: skill@1024=+1.000 con_late=1.9030 decay_min=-9.69e-08 (93s)
+  s6   scalar: skill@1024=-6.511 con_late=19.5784 decay_min=1.08e-03 (85s)
+  s6  scalar0: skill@1024=+0.998 con_late=6.3257 decay_min=2.20e-09 (71s)
+  s6    diag0: skill@1024=+0.873 con_late=383.0674 decay_min=2.08e-09 (50s)
+  s6       ks: skill@1024=+0.424 con_late=1.5475 decay_min=7.60e-04 (52s)
+  s6   pinned: skill@1024=+1.000 con_late=8.6581 decay_min=-3.71e-09 (54s)
+  s7   scalar: skill@1024=-0.504 con_late=7.1576 decay_min=8.33e-04 (50s)
+  s7  scalar0: skill@1024=+0.789 con_late=26.9713 decay_min=2.18e-09 (49s)
+  s7    diag0: skill@1024=+0.931 con_late=14.6187 decay_min=2.07e-09 (50s)
+  s7       ks: skill@1024=+0.465 con_late=5.0117 decay_min=6.82e-04 (51s)
+  s7   pinned: skill@1024=+1.000 con_late=2.3946 decay_min=1.16e-07 (55s)
+  s8   scalar: skill@1024=+0.117 con_late=2.8679 decay_min=9.15e-04 (72s)
+  s8  scalar0: skill@1024=+0.998 con_late=9.2208 decay_min=2.18e-09 (82s)
+  s8    diag0: skill@1024=+0.984 con_late=16.4680 decay_min=2.08e-09 (75s)
+  s8       ks: skill@1024=+0.361 con_late=2.4880 decay_min=7.54e-04 (62s)
+  s8   pinned: skill@1024=+1.000 con_late=5.7428 decay_min=-1.43e-07 (93s)
+  s9   scalar: skill@1024=+0.176 con_late=2.7010 decay_min=8.64e-04 (84s)
+  s9  scalar0: skill@1024=+1.000 con_late=7.0558 decay_min=2.18e-09 (86s)
+  s9    diag0: skill@1024=+1.000 con_late=3.2524 decay_min=2.08e-09 (86s)
+  s9       ks: skill@1024=+0.067 con_late=5.2188 decay_min=9.02e-04 (89s)
+  s9   pinned: skill@1024=+1.000 con_late=2.6639 decay_min=9.78e-08 (96s)
+
+     arm |  ledger skill@1024 med [IQR] |   content late med [IQR] | ledger holds (skill>0)
+--------------------------------------------------------------------------------------------
+  scalar |   -2.938 [-5.848,-0.038] |   21.290 [3.940,28.516] |          3/10
+ scalar0 |   +0.990 [+0.834,+0.997] |    8.138 [6.351,13.849] |          9/10
+   diag0 |   +0.971 [+0.930,+0.995] |   11.765 [7.326,19.137] |          9/10
+      ks |   +0.346 [+0.124,+0.406] |    3.643 [1.771,5.167] |          9/10
+  pinned |   +1.000 [+1.000,+1.000] |    5.211 [2.462,6.911] |         10/10
+--------------------------------------------------------------------------------------------
+
+PAIRED TESTS vs pinned (pre-registered; two-sided exact sign test)
+  pinned vs   scalar on skill_1024: wins 10/10 (ties 0), sign p=0.001953
+  pinned vs   scalar on   con_late: wins 8/10 (ties 0), sign p=0.1094
+  pinned vs  scalar0 on skill_1024: wins 9/10 (ties 0), sign p=0.02148
+  pinned vs  scalar0 on   con_late: wins 7/10 (ties 0), sign p=0.3438
+  pinned vs    diag0 on skill_1024: wins 10/10 (ties 0), sign p=0.001953
+  pinned vs    diag0 on   con_late: wins 8/10 (ties 0), sign p=0.1094
+  pinned vs       ks on skill_1024: wins 10/10 (ties 0), sign p=0.001953
+  pinned vs       ks on   con_late: wins 3/10 (ties 0), sign p=0.3438

@@ -1,0 +1,26 @@
+[env] rescue_stats torch=2.5.1+cu121 cuda=12.1 gpu=NVIDIA GeForce RTX 3060 Laptop GPU commit=2a12198 dirty=True
+LONG ARM (3x budget), seeds 0-4
+    s0: skill=+0.685 con_late=0.604 dmin=3.64e-04
+    s1: skill=-2.856 con_late=21.961 dmin=5.85e-04
+    s2: skill=+0.285 con_late=1.512 dmin=5.11e-04
+    s3: skill=-3.587 con_late=23.633 dmin=5.84e-04
+    s4: skill=-1.031 con_late=0.281 dmin=7.18e-04
+        long n=5: skill med -1.031 [-3.587,+0.685]  content med 1.512  rescued(skill>0): 2/5
+
+REG ARM lambda sweep, seeds 0-2
+    lam=0.3  s0: skill=-6.780 con_late=0.778 dmin=1.94e-04
+    lam=0.3  s1: skill=-6.913 con_late=16.681 dmin=2.19e-04
+    lam=0.3  s2: skill=-6.555 con_late=5.829 dmin=1.73e-04
+     reg lam=0.3: skill med -6.780 [-6.913,-6.555]  content med 5.829  rescued(skill>0): 0/3
+    lam=3    s0: skill=-1.457 con_late=0.417 dmin=5.35e-05
+    lam=3    s1: skill=-6.524 con_late=51.080 dmin=6.07e-05
+    lam=3    s2: skill=-7.213 con_late=99.868 dmin=5.14e-05
+       reg lam=3: skill med -6.524 [-7.213,-1.457]  content med 51.080  rescued(skill>0): 0/3
+    lam=30   s0: skill=+0.950 con_late=0.357 dmin=3.56e-05
+    lam=30   s1: skill=+0.114 con_late=36.205 dmin=3.78e-05
+    lam=30   s2: skill=+0.955 con_late=0.388 dmin=2.99e-05
+      reg lam=30: skill med +0.950 [+0.114,+0.955]  content med 0.388  rescued(skill>0): 3/3
+
+VERDICT INPUTS
+  long: median -1.031; rescued 2/5 -> budget alone CAN rescue sometimes - soften the verdict
+  reg: best median over lambdas +0.950 -> some lambda rescues - REVISE soft-fixes-fail

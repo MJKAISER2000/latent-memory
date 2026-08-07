@@ -56,6 +56,12 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | freeze probe: sqrt(v-hat) below Adam eps=1e-8 | freeze_probe.txt | 2.654e-09 | <1e-8 | OK |
 | freeze probe verdict: eps-floor confirmed | freeze_probe.txt | present | present | OK |
 | l0_forget Phase A: necessity criterion evaluated | L0_forget.txt | 92.4% vs 20% required | PASS or FAIL recorded | OK |
+| n10 guard: bit-exact reproduction of committed scalar s0 | L0_forget_n10.txt | passed | passed | OK |
+| n10: pinned +1.000 [1.000,1.000], holds 10/10 | L0_forget_n10.txt | 10/10 | 10/10 | OK |
+| n10 paired ledger wins vs pinned: 10/9/10/10 | L0_forget_n10.txt | scalar:10,scalar0:9,diag0:10,ks:10 | 10,9,10,10 | OK |
+| rescue: lambda=30 rescues 3/3 (med +0.95) | rescue_stats.txt | med +0.950, 3/3 | 3/3, ~0.95 | OK |
+| rescue: 3x budget rescues 2/5 (unreliable) | rescue_stats.txt | 2/5 | 2/5 | OK |
+| scaling: d*.K spread 5.6x (> pre-stated 4x -> 1/K refuted) | scaling_dstar.txt | 5.60x | 5.60x | OK |
 | RDATA.LTR matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.00e+00 | <=2% | OK |
 | RDATA.LTE matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.05 | <=1.0 abs | OK |
 | RDATA.HOR.dissipative matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
@@ -63,4 +69,4 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | RDATA.HOR.pinned matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
 | RDATA.STATS pinned skills match log rows | dashboard vs L0_stats.txt | 10 values | identical multiset | OK |
 
-**58/58 claims verified; 0 mismatches.**
+**64/64 claims verified; 0 mismatches.**

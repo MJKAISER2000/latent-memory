@@ -84,3 +84,25 @@ Known limitations that remain open (in priority order):
   clean experimental break.
 - The d*·K_train scaling law, L1-count on real LM states, and any claim beyond
   the synthetic task family remain untested (compute-bounded).
+
+
+## Hardening outcomes (post-audit runs; drivers committed before data)
+
+1. `results/L0_forget_n10.txt` — guard reproduced committed scalar s0 bit-exact;
+   5 arms x 10 seeds. Pinned: +1.000 [1.000,1.000], holds 10/10, wins the
+   pre-registered paired ledger tests vs every alternative (10/10, p=0.002,
+   vs scalar/diag0/ks; 9/10, p=0.021, vs scalar0). Freezes hold 9/10 at
+   0.97-0.99. Content differences not significant. The n=3 "first evidence"
+   upgrades to statistically supported on the ledger metric; the n=3
+   freeze-failure impression (1/3) moderates to ~1/10.
+2. `results/rescue_stats.txt` — REVISES two verdicts. "3x budget does not
+   rescue" -> unreliable (2/5). "Soft fixes fail" -> refuted as stated:
+   lambda=30 rescues 3/3 (skill +0.95, content 0.39); lambda<=3 fails 0/6.
+   Stable conclusion: the retained direction's effective decay must reach ~0;
+   the mechanism (freeze / projection / strong penalty) is secondary, with
+   projection uniquely exact and the most reliable at n=10.
+3. `results/scaling_dstar.txt` — REFUTES the d* ~ 1/K_train prediction at the
+   pre-stated threshold (d*.K spread 5.6x > 4x over K in [32,256]); d* stays
+   at 0.75-1.1e-3 (init/task-anchored; init=1e-3 confound acknowledged;
+   STEPS fixed across K). Horizon-robust fact: under-retention at 16xK at
+   every K tested. "Horizon-myopic" wording narrowed accordingly.

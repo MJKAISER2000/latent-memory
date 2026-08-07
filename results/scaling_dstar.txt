@@ -1,0 +1,24 @@
+[env] scaling_dstar torch=2.5.1+cu121 cuda=12.1 gpu=NVIDIA GeForce RTX 3060 Laptop GPU commit=2a12198 dirty=True
+d* vs 1/K_train scaling  (scalar arm; K_test = 16*K_train)
+
+  K=  32 s0: d*=1.072e-03  d*K=0.0343  skill@16K=-2.765  (87s)
+  K=  32 s1: d*=1.130e-03  d*K=0.0362  skill@16K=-3.048  (66s)
+  K=  32 s2: d*=1.069e-03  d*K=0.0342  skill@16K=-0.375  (68s)
+  K=  64 s0: d*=7.749e-04  d*K=0.0496  skill@16K=-6.651  (133s)
+  K=  64 s1: d*=8.941e-04  d*K=0.0572  skill@16K=-6.718  (135s)
+  K=  64 s2: d*=9.009e-04  d*K=0.0577  skill@16K=-6.241  (140s)
+  K= 128 s0: d*=7.737e-04  d*K=0.0990  skill@16K=-5.469  (240s)
+  K= 128 s1: d*=7.900e-04  d*K=0.1011  skill@16K=-5.466  (247s)
+  K= 128 s2: d*=7.576e-04  d*K=0.0970  skill@16K=-5.287  (213s)
+  K= 256 s0: d*=7.009e-04  d*K=0.1794  skill@16K=-5.077  (423s)
+  K= 256 s1: d*=7.510e-04  d*K=0.1922  skill@16K=-6.207  (476s)
+  K= 256 s2: d*=8.321e-04  d*K=0.2130  skill@16K=-5.553  (492s)
+
+ K_train      d* med  d*·K_train med  skill@16K med
+      32   1.072e-03          0.0343         -2.765
+      64   8.941e-04          0.0572         -6.651
+     128   7.737e-04          0.0990         -5.466
+     256   7.510e-04          0.1922         -5.553
+
+d*·K_train spread across a 8x horizon range: 5.60x
+READING: if d* tracked ONLY the init (1e-3), d*·K would grow 8x across this range; if d* is horizon-set, d*·K stays ~flat. Spread <~2x supports the horizon-myopic attractor; >~4x argues d* is init- or task-anchored, and the mechanism wording must weaken.

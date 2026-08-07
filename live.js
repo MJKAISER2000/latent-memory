@@ -1,5 +1,5 @@
 window.LIVE = {
- "generated": "2026-08-06 22:35:50",
+ "generated": "2026-08-07 01:17:02",
  "runs": [
   {
    "name": "L0 frontier (3 seeds)",
@@ -33,6 +33,21 @@ window.LIVE = {
   },
   {
    "name": "L0-Forget (necessity + arms)",
+   "state": "done",
+   "note": ""
+  },
+  {
+   "name": "L0-Forget n=10 (5 arms)",
+   "state": "done",
+   "note": ""
+  },
+  {
+   "name": "Rescue statistics",
+   "state": "done",
+   "note": ""
+  },
+  {
+   "name": "d* scaling sweep",
    "state": "done",
    "note": ""
   },
@@ -141,8 +156,8 @@ window.LIVE = {
   ]
  },
  "verif": {
-  "ok": "58",
-  "total": "58",
+  "ok": "64",
+  "total": "64",
   "mismatches": "0"
  }
 };
