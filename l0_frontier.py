@@ -262,4 +262,9 @@ READING
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("l0_frontier")
+    except ImportError:
+        pass
     main()

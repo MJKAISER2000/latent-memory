@@ -256,5 +256,10 @@ READING (pre-stated predictions; any other outcome falsifies that row)
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("l0_forget")
+    except ImportError:
+        pass
     if phase_a():
         phase_b()

@@ -85,12 +85,25 @@ def run_table():
     return runs, st
 
 
+def verification_count():
+    """Parse the live count from VERIFICATION.md (hardening item 8: the count
+    staled three times when maintained by hand)."""
+    p = R / "VERIFICATION.md"
+    if not p.exists():
+        return None
+    m = re.search(r"\*\*(\d+)/(\d+) claims verified; (\d+) mismatch",
+                  p.read_text(encoding="utf-8", errors="replace"))
+    return {"ok": m.group(1), "total": m.group(2),
+            "mismatches": m.group(3)} if m else None
+
+
 def build():
     runs, stats = run_table()
     payload = {
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "runs": runs,
         "stats": stats,
+        "verif": verification_count(),
     }
     (ROOT / "live.js").write_text(
         "window.LIVE = " + json.dumps(payload, indent=1) + ";\n"

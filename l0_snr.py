@@ -109,4 +109,9 @@ IMPLIED DRIFT BUDGET
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("l0_snr")
+    except ImportError:
+        pass
     main()

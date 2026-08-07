@@ -25,6 +25,21 @@ def sh(cmd: str) -> str:
         return f"<{e}>"
 
 
+def banner(tag: str = "") -> None:
+    """One-line environment banner for experiment logs (hardening item 7).
+    Print-only: consumes no RNG, alters no behavior."""
+    try:
+        import torch
+        gpu = (torch.cuda.get_device_name(0) if torch.cuda.is_available()
+               else "cpu")
+        print(f"[env] {tag} torch={torch.__version__} "
+              f"cuda={torch.version.cuda} gpu={gpu} "
+              f"commit={sh('git rev-parse --short HEAD')} "
+              f"dirty={bool(sh('git status --porcelain'))}", flush=True)
+    except Exception as e:
+        print(f"[env] banner unavailable: {e}", flush=True)
+
+
 def main():
     import torch
 

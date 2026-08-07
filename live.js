@@ -1,5 +1,5 @@
 window.LIVE = {
- "generated": "2026-08-06 02:27:00",
+ "generated": "2026-08-06 22:35:50",
  "runs": [
   {
    "name": "L0 frontier (3 seeds)",
@@ -139,6 +139,11 @@ window.LIVE = {
     "p": "0.001953"
    }
   ]
+ },
+ "verif": {
+  "ok": "58",
+  "total": "58",
+  "mismatches": "0"
  }
 };
 if (window.renderLive) window.renderLive();

@@ -64,4 +64,9 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("scaling_dstar")
+    except ImportError:
+        pass
     main()

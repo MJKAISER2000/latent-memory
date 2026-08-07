@@ -109,4 +109,9 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("l0_stats")
+    except ImportError:
+        pass
     main()

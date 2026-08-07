@@ -201,5 +201,10 @@ INTERPRETATION
 
 
 if __name__ == "__main__":
+    try:
+        from capture_env import banner
+        banner("l0_mechanism")
+    except ImportError:
+        pass
     landscape(seed=0)
     rescue(seeds=(0, 1))

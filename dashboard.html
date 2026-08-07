@@ -8,7 +8,9 @@
 MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
             chtml: { scale: 0.96 } };
 </script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+  onerror="document.body.insertAdjacentHTML('afterbegin',
+  '<div style=&quot;background:#3a2b12;color:#d9a03c;padding:6px 14px;font:13px sans-serif&quot;>Offline: formulas render as TeX source (MathJax CDN unreachable).</div>')"></script>
 <script src="live.js"></script>
 <style>
   :root{
@@ -180,7 +182,7 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
   horizon &mdash; median over 10 seeds, minimum +0.999 (learned baselines: &minus;6)</span></div>
   <div class="stat"><b class="gold">89,222&times;</b><span>train-vs-test loss sensitivity gap in
   the sub-critical decay region &mdash; the measured mechanism</span></div>
-  <div class="stat"><b>58/58</b><span>quantitative claims recomputed from raw logs by an
+  <div class="stat"><b id="verif-hero">58/58</b><span>quantitative claims recomputed from raw logs by an
   independent parser (<span class="mono">VERIFICATION.md</span>)</span></div>
   <div class="stat"><b class="red">3</b><span>of our own hypotheses refuted by our own probes
   &mdash; each replaced by a measured mechanism</span></div>
@@ -1146,7 +1148,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 
 <footer>
   <span>Latent Twin Memory &middot; independent research project &middot; Aug 2026</span>
-  <span>58/58 claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
+  <span><span id="verif-footer">58/58</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
   full provenance in git history &middot; single RTX 3060 (6 GB)</span>
 </footer>
 
@@ -1189,6 +1191,13 @@ function renderLive(){
   }
   document.getElementById('live-stamp').textContent=
     'data as of '+L.generated+extra;
+  if(L.verif){
+    const v=L.verif.ok+'/'+L.verif.total;
+    const h=document.getElementById('verif-hero');
+    const f=document.getElementById('verif-footer');
+    if(h) h.textContent=v; if(f) f.textContent=v;
+    if(h && L.verif.mismatches!=='0') h.style.color='var(--red)';
+  }
 }
 renderLive();
 setInterval(()=>{                       // re-inject live.js (cache-busted)
