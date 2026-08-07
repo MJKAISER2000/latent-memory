@@ -56,6 +56,73 @@ Also load-bearing: our first headline result ("29× better!") was an artifact
 of a rigged baseline — caught by our own adversarial audit, retracted, and
 kept in the repo as a case study, along with the audit protocol that caught it.
 
+## Exact experimental process
+
+**The memory.** State `z ∈ R^8`. Per input block: `z_{k+1} = exp(W)·z_k + Enc(x_k)`,
+where `Enc` and `Dec` are 2-hidden-layer MLPs (width 64, SiLU). Ledger readout:
+`M̂ = gain·⟨r, z⟩ + bias` (direction `r` learned; for the pinned arm it is tied to the
+conserved direction `C`). The **only** thing that differs between arms is how the
+transition generator `W` is parameterized (`A`, `B` are learned 8×8 matrices,
+`s`, `d` learned decay parameters, softplus-positive, all initialized so decay = 1e-3):
+
+| arm | W | can it protect one direction? |
+|---|---|---|
+| scalar | `(A−Aᵀ) − softplus(s)·I` | no — uniform decay |
+| diag | `(A−Aᵀ) − diag(softplus(d))` | representable, must be learned |
+| ks | `(A−Aᵀ) − BBᵀ − softplus(s)·I` | representable, must be learned |
+| scalar0 / diag0 | same as scalar/diag, decay init at −20 (≈0, de-facto frozen under Adam) | protects everything |
+| pinned | `P(A−Aᵀ)P − (PB)(PB)ᵀ − softplus(s)·P`, `P = I − CCᵀ` | yes, exactly, by construction |
+
+Live parameter counts were probe-verified (scalar 75 / diag 82 / ks 139 / pinned 139
+non-encoder params; encoder+decoder ≈13.6k identical everywhere; ks exactly matches pinned).
+
+**The tasks.** Synthetic streams of K blocks. Each block carries a deposit
+`a_k = flag_k · amount_k` (flag ~ Bernoulli(p), p drawn per-sequence from U(0.1, 0.5) so a
+constant predictor can't win; amount ~ U(0,1); both are channels *inside* the block, so the
+label `M_t = Σ a_k` is a nonlinear function of the input that no arm gets for free) plus
+Gaussian distractor content. Two variants: the *frontier* task (32-dim blocks, 8-dim memory)
+and the *forced-forgetting* task (8-dim blocks, content variance 1.0, reconstruction target =
+the 6 non-deposit channels of the current block). For the latter we first **validated the
+tension**: models with fixed decay swept over d ∈ {0, 1e-3, 1e-2, 0.1, 1} show
+never-forgetting costs 13× on content (median 3.53 vs 0.27; pre-stated criterion ≥20%
+improvement — passed at 92.4%), so retention and forgetting genuinely conflict.
+
+**Training.** Every arm, identical recipe: Adam (lr 3e-3, default betas/ε), batch 64,
+3000 steps (2000 on the forgetting task), LR halved every third of training, gradient-norm
+clip 1.0, K_train = 64. Loss = MSE(ledger prediction, true running sum, at every prefix)
++ MSE(content reconstruction). Weights seeded by `torch.manual_seed(seed)`; data drawn from
+a per-device `torch.Generator(seed+1)`.
+
+**Evaluation.** K_test = 1024 (16× the training horizon), fresh generator (`seed+7777`,
+disjoint from training; all arms at a given seed share the identical eval batch, making
+paired tests valid), 512 sequences. Ledger metric: *skill* = 1 − MSE/MSE_const, where the
+constant is the eval batch's own mean (an oracle baseline; 0 = no better than ignoring the
+input, 1 = perfect). Content metric: reconstruction MSE at t = 64 and t = 1024. Diagnostics
+per run: minimum decay eigenvalue and alignment of the slowest direction with the readout.
+
+**Statistics.** 10 seeds per arm, paired by seed, exact two-sided sign tests. Comparisons
+committed to git before the data existed (verifiable in history); where that was only
+partially true for one earlier run, the report says so and gives the fresh-seed-only
+statistic.
+
+**Mechanism probes.** (a) *Landscape*: take a trained model, sweep its decay across 22
+values, record train-horizon loss, test-horizon loss, and the gradient — locating the
+interior train-loss minimum at d\* ≈ 9.7e-4, where training converged. (b) *SNR*: at each
+decay value, 64 minibatch gradients — mean, spread, and sign; the mean gradient pushes decay
+*up* below d\* and *down* above it (SNR 1.3–11.2, the dip exactly at d\*'s zero crossing).
+(c) *Freeze probe*: per-step gradient magnitudes and Adam moment estimates for a frozen-zero
+run — showing updates collapse because √v̂ ≈ 2.7e-9 sits below Adam's ε = 1e-8.
+(d) *Scaling*: repeat training at K_train ∈ {32, 64, 128, 256} with K_test = 16×K_train.
+
+**Process controls.** One-variable controls (the original headline died when changing a
+single constant erased it); a no-input floor and an information floor bracketing every
+metric; oracle affine recalibration on held-out batches to separate information loss from
+miscalibration; parameter accounting by autograd probe; a bit-exact reproduction guard
+before extending any experiment; environment capture (torch/CUDA/GPU/commit) per run; and
+an independent verifier that re-parses every committed log and recomputes all 64 quantitative
+claims in the documentation (0 mismatches). Results reproduce bit-exactly on the recorded
+GPU; data streams are device-class-specific (CPU runs will differ — documented).
+
 ## Drawbacks
 
 - **All evidence is synthetic.** Small toy tasks (8-dim inputs, 8-dim memory)
