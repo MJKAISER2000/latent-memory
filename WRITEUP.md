@@ -6,20 +6,28 @@ early on trusting numbers I'd typed by hand. Everything ran on my laptop's RTX 3
 
 ## The idea
 
-I was reading a scientific-ML paper (Chung, Bu & Verma, *Physics-Conforming Latent
-Twins*) where they build simulators whose latent dynamics *can't* violate
-conservation laws — not "trained not to," literally can't, it's baked into the
-matrix algebra. And the thought was: LLMs are terrible at holding onto facts over
-long contexts. What if you built a memory the same way physicists build these
-simulators, where the important stuff is mathematically impossible to forget?
+This started with the Physics-Conforming Latent Twins paper (Chung, Bu & Verma —
+I'm one of Dr. Chung's students, and this is what happened when I wondered how far
+the framework stretches). The paper builds latent surrogates where conservation
+laws hold *by construction* — not trained in, baked into the matrix algebra — and
+there's a remark early on saying the time index can really be any ordered
+parameter. I took that literally: what if the "system" is an LLM's context, and
+the "time steps" are just blocks of tokens? LLMs are famously bad at holding onto
+facts over long contexts. Could you build their memory the way the paper builds
+simulators, so the important stuff is mathematically impossible to forget?
 
-Concretely: a small recurrent state `z` that updates as text streams by, with a
-transition matrix built so one designated subspace is exactly conserved
-(`CᵀW = 0`) while everything else can decay. When you drive it with inputs you get
-what I've been calling a balance law — the protected "ledger" part of the memory
-changes *only* by explicit deposits, and I can verify that to about 1e-13. So the
-question became: does a memory with hard guarantees actually beat one that just
-learns to remember?
+Concretely, I borrowed the heat-equation setup from the paper's experiments —
+`W = K + S` with the projection that makes `CᵀW = 0` exactly — and pushed it from
+the autonomous setting into a driven one, where new input arrives every step:
+`z_{k+1} = e^W z_k + Enc(x_k)`. The conclusion of the paper actually mentions
+forcing and balance laws as a natural extension, and it goes through really
+cleanly: exact conservation turns into an exact balance law, `Cᵀz_t = Cᵀz_s +
+Σ Cᵀg_k`, good to about 1e-13 with no penalty term anywhere. So conservation
+comes for free, and the whole learning problem shifts into making the deposits
+`Cᵀg_k` *mean* the right thing — which is basically the paper's pullback-matching
+idea moved to the input side, and Figure 10's warning applies unchanged:
+conserving a quantity nobody anchored is conserving nothing. The question for the
+summer: does any of this beat a memory that just learns to remember?
 
 ## What I found
 
@@ -62,6 +70,16 @@ forgetting). Nope. Across an 8× range of training lengths it barely moves
 generalize is the failure itself — under-retention at 16× showed up at every
 training length I tried. Why the attractor sits where it sits is genuinely open;
 my sweep can't separate "set by the init" from "set by the task."
+
+**One that I think is the most "PCLT" result of the bunch:** early on I was
+convinced the balance law meant sparse supervision would come free — supervise
+the ledger at one horizon, get every other horizon automatically. Totally wrong:
+the free transport shows up for *every* generator mode, because it comes from the
+shared per-block encoder, not from conservation. But that's actually the paper's
+pullback-vs-conformity distinction playing out in my experiments without me
+asking for it — the encoder side decides what the latent quantity *means*, the
+generator side decides whether it *survives*, and they really are separate knobs.
+I just found it out the embarrassing way.
 
 **Finding 0, which colors everything above:** my first headline result — "my
 method is 29× better!!" — was fake. Not fraud, just a subtle rigging: I'd given

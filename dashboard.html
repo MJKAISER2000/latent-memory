@@ -206,10 +206,12 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
 <!-- ============================================================ IDEA -->
 <div class="card" id="sec-idea">
 <h2>1 &middot; The idea</h2>
-<p>The paper that started this builds fast physics simulators as
-<span class="blue">encode &rarr; evolve in latent space &rarr; decode</span> — with a twist I
-couldn't stop thinking about: the latent dynamics are <b>constructed so the physics can't be
-violated</b>. Conservation isn't trained in, it's baked into the matrix algebra:</p>
+<p>This grew straight out of the Physics-Conforming Latent Twins paper (I'm one of
+Dr. Chung's students). PCLT builds latent surrogates
+<span class="blue">encode &rarr; evolve &rarr; decode</span> where the physics <b>can't be
+violated</b> — conservation is baked into the matrix algebra, not trained in. And there's a
+remark in the paper saying the time index can be any ordered parameter, which I took as
+permission:</p>
 <div class="math-block">$$\Psi(t,s,u_s) = d\big(m_{s\to t}(e(u_s))\big),\qquad
 m_{s\to t}(z)=e^{(t-s)W}z$$</div>
 <p>My idea was to point this at <b>LLM context</b>: treat the token stream as the physical
@@ -231,9 +233,11 @@ $$W = K+S \;\;\Longrightarrow\;\; \underbrace{C^{\top}W = 0}_{\text{protected su
 C^{\top}z_t \;=\; C^{\top}z_s+\sum_{k=s}^{t-1}C^{\top}g_k
 \qquad\textit{(verified to } 3.2\times10^{-13}\textit{, no loss term)}$$</div>
 <p class="mut">Conservation is then <i>free</i>; the entire learning problem is making the flux
-\(C^{\top}g_k\) mean the right thing — the input-side analogue of the paper's pullback-matching
-loss (their Eq.&nbsp;7), whose Fig.&nbsp;10 shows conservation without anchoring is conservation
-of nothing.</p>
+\(C^{\top}g_k\) mean the right thing — the paper's pullback-matching loss (Eq.&nbsp;7), just moved to
+the input side. Fig.&nbsp;10's warning carries over unchanged: conserving an unanchored
+quantity is conserving nothing. The driven setting itself is the extension the paper's
+conclusion sketches (forcing terms as balance-law contributions) — it goes through exactly,
+and the arms compared in §4 are essentially Table&nbsp;1's columns made to race each other.</p>
 </div>
 
 <!-- ============================================================ ANIMATION -->
@@ -829,7 +833,9 @@ for <b>every</b> generator mode (interior errors 0.164/0.145/0.143 across modes;
 random samples identifies the per-block flux function regardless of generator structure.</dd>
 <dt>Significance</dt><dd>Kills a seductive story we almost built on, and clarifies the division of
 labor: <b>the encoder determines what a supervised functional means; the generator determines
-whether it survives.</b> Useful design lens for any latent-memory system.</dd>
+whether it survives.</b> Which is the paper's pullback-vs-conformity distinction showing up
+in my data uninvited — I found the two knobs are genuinely separate by predicting the wrong
+one mattered. Useful design lens for any latent-memory system.</dd>
 </dl>
 <div class="prov"><span class="prov-label">Provenance</span>
 <a class="xref" onclick="return goto('page-log','sec-results')">§4 L0.5 table</a>

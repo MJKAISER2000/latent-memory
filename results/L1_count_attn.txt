@@ -1,0 +1,5 @@
+[env] train_memory_attn torch=2.5.1+cu121 cuda=12.1 gpu=NVIDIA GeForce RTX 3060 Laptop GPU commit=c800dcc dirty=True
+train T (300, 59, 64, 896) (fp16 cpu)  K_train=59
+  s0   scalar: eval@59=-0.412 decay=1.33e-03 (264s)
+  s0  scalar0: eval@59=-0.298 decay=2.17e-09 (251s)
+  s0    diag0: eval@59=-0.386 decay=2.11e-09 (240s)
