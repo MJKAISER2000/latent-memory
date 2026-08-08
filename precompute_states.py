@@ -119,7 +119,7 @@ def main():
         if mask.shape[0] < X.shape[0]:                 # pad if rounding differed
             mask = torch.cat([mask, torch.zeros(X.shape[0] - mask.shape[0],
                                                 dtype=torch.bool)])
-        recs.append({
+        rec = {
             "X": X,                                    # (n_blocks, d_model)
             "durable": mask,                           # (n_blocks,)
             "query_ids": torch.tensor(t["query_ids"]),
@@ -127,7 +127,32 @@ def main():
             "answer_ids": torch.tensor(t["answer_ids"]),
             "task": s.task,
             "n_tokens": t["n_tokens"],
-        })
+        }
+        # Additive (L1 ledger experiment): for `count` samples, store each
+        # deposit's block index and its amount, parsed from the durable span
+        # text ("A shipment of N units..."). Enables per-block running-total
+        # supervision downstream. Absent/None for other tasks.
+        if s.task == "count" and s.durable_spans:
+            import re as _re
+            enc2 = tok(s.text, return_offsets_mapping=True,
+                       add_special_tokens=False)
+            offs2 = enc2["offset_mapping"]
+            dep_blocks, dep_amounts = [], []
+            for (cs, ce) in s.durable_spans:
+                m = _re.search(r"of (\d+) units", s.text[cs:ce])
+                if not m:
+                    continue
+                tok_i = next((ti for ti, (ts, te) in enumerate(offs2)
+                              if te > cs), None)
+                if tok_i is None:
+                    continue
+                b = tok_i // args.block
+                if b < X.shape[0]:
+                    dep_blocks.append(b)
+                    dep_amounts.append(float(m.group(1)))
+            rec["deposit_blocks"] = torch.tensor(dep_blocks, dtype=torch.long)
+            rec["deposit_amounts"] = torch.tensor(dep_amounts)
+        recs.append(rec)
         if (i + 1) % 10 == 0 or i == 0:
             print(f"  [{i+1}/{len(rows)}] {t['n_tokens']:,} tok -> "
                   f"{X.shape[0]} blocks x {X.shape[1]}", flush=True)
