@@ -173,8 +173,8 @@ MathJax = { tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$']] },
 <div class="wrap">
 
 <h1>Physics-Conforming Latent Twins <span class="accent">&rarr;</span> LLM Context Memory</h1>
-<div class="sub">Research dashboard &middot; August 2026 &middot; based on Chung, Bu &amp; Verma,
-<i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; every experiment on one
+<div class="sub">My research log &middot; summer 2026 &middot; started from Chung, Bu &amp; Verma's
+<i>Physics-Conforming Latent Twins</i> (arXiv:2606.15053) &middot; everything here ran on one
 RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
 
 <div class="hero">
@@ -206,14 +206,14 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
 <!-- ============================================================ IDEA -->
 <div class="card" id="sec-idea">
 <h2>1 &middot; The idea</h2>
-<p>The paper learns a surrogate solution operator for a physical system as
-<span class="blue">encode &rarr; evolve in latent space &rarr; decode</span>, with the latent
-generator <b>constrained so that selected physical quantities are conserved or dissipated by
-construction</b>:</p>
+<p>The paper that started this builds fast physics simulators as
+<span class="blue">encode &rarr; evolve in latent space &rarr; decode</span> — with a twist I
+couldn't stop thinking about: the latent dynamics are <b>constructed so the physics can't be
+violated</b>. Conservation isn't trained in, it's baked into the matrix algebra:</p>
 <div class="math-block">$$\Psi(t,s,u_s) = d\big(m_{s\to t}(e(u_s))\big),\qquad
 m_{s\to t}(z)=e^{(t-s)W}z$$</div>
-<p>Our transplant: treat <b>LLM context</b> as the driven physical system. State = a small latent
-memory \(z\in\mathbb R^{n_z}\); time = block index; and the generator is built so a
+<p>My idea was to point this at <b>LLM context</b>: treat the token stream as the physical
+system. State = a small latent memory \(z\in\mathbb R^{n_z}\); time = block index; and the generator is built so a
 <b>designated subspace is exactly conserved</b> while everything orthogonal decays monotonically:</p>
 <div class="math-block">
 $$P = I - CC^{\top},\qquad
@@ -222,7 +222,8 @@ S = -(PB)(PB)^{\top}-\varepsilon P$$
 $$W = K+S \;\;\Longrightarrow\;\; \underbrace{C^{\top}W = 0}_{\text{protected subspace}}
 \quad\text{and}\quad \underbrace{W+W^{\top}\preceq 0}_{\text{everything else decays}}$$
 </div>
-<p>The paper's flow is autonomous; context memory is <b>driven</b> by incoming token blocks
+<p>One catch: the paper's systems evolve on their own, but a context memory keeps getting
+<b>new input</b> — token blocks
 \(g_k = \mathrm{Enc}(x_k)\). Under forcing, exact conservation upgrades to an exact
 <b>balance law</b> — the ledger changes only by what came in the door:</p>
 <div class="math-block">$$z_{k+1}=e^{\Delta t\,W}z_k+g_k
@@ -267,17 +268,19 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 
 <div class="tl-item find">
   <h3>Structural self-test <span class="pill p-find">VERIFIED</span></h3>
-  All guarantees hold at machine precision (float64): \(\max|C^\top W| = 5\times10^{-16}\),
+  The math checks out at machine precision (float64): \(\max|C^\top W| = 5\times10^{-16}\),
   \(\lambda_{\max}(W{+}W^\top)\le 0\), ledger drift \(2\times10^{-11}\) at \(t{=}10^4\),
   driven balance law exact to \(3.2\times10^{-13}\) over 128 forced steps.
-  <span class="mut">The machinery does exactly what it claims. This part never wavered.</span>
+  <span class="mut">This part never wavered — whatever else went wrong, the construction itself
+  does exactly what it says.</span>
 </div>
 
 <div class="tl-item fail">
   <h3>L0 &mdash; synthetic ledger <span class="pill p-fail">ARTIFACT</span></h3>
-  Train a running-total task at \(K{=}64\), test at \(K{=}1024\). Headline looked spectacular:
-  pinned 12.7&times; better than the scalar-decay baseline at 16&times; extrapolation, error
-  <i>falling</i> as \(1/\sqrt t\). <b>It did not survive its own audit</b> — see the failure ledger.
+  My first experiment, and my favorite result right up until it fell apart. Train a
+  running-total task at \(K{=}64\), test at \(K{=}1024\): pinned looked 12.7&times; better than
+  the baseline at 16&times; extrapolation, with error <i>falling</i> over time. I believed it for
+  about a day. <b>It did not survive its own audit</b> — full autopsy in §5.
   What genuinely survives: pinned lands \(\sim\)1.55&times; off the information-theoretic floor and
   tracks the sample-specific total with \(r=0.987\). A real working accumulator — just not
   evidence of superiority.
@@ -285,11 +288,11 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 
 <div class="tl-item fail">
   <h3>L0.5 &mdash; anchor transport <span class="pill p-fail">FALSIFIED</span></h3>
-  Hypothesis: supervising the ledger at <i>one</i> horizon (\(t{=}64\)) should give the pinned
-  model every other horizon free, via the balance law. Result: sparse&nbsp;&asymp;&nbsp;dense for
-  <b>every</b> mode (transport ratio &asymp; 1.0 across 18 configs). The transport comes from the
-  <b>shared per-block encoder</b>, not from conservation.
-  <span class="mut">Killed one of our two claimed novelties. Cheap to learn, good to know.</span>
+  I was convinced the balance law meant you could supervise the ledger at <i>one</i> horizon
+  and get every other horizon free. Wrong: sparse&nbsp;&asymp;&nbsp;dense supervision for
+  <b>every</b> mode, not just mine (18 configs). The free transport comes from the
+  <b>shared per-block encoder</b>, which all the modes have.
+  <span class="mut">That killed one of my two claimed novelties. At least it was cheap to learn.</span>
 </div>
 
 <div class="tl-item part">
@@ -304,12 +307,12 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
 
 <div class="tl-item find">
   <h3>Adversarial audit (4 independent lenses) <span class="pill p-find">DECISIVE NEGATIVE</span></h3>
-  One-variable control: set \(\varepsilon{=}0\) in the dissipative baseline. Its error at
-  \(t{=}1024\): 0.339&nbsp;&rarr;&nbsp;0.055. After a single scale+offset:
-  <b>0.0111 vs pinned's 0.0112, identical correlation. Advantage&nbsp;=&nbsp;1.00&times;.</b>
-  The entire L0 gap was our own hard-coded leak — see §5.
-  <span class="mut">This is the most valuable result so far: a real, mechanistic, reproducible
-  explanation of a seductive false positive.</span>
+  The control that killed my best number: set \(\varepsilon{=}0\) in the baseline and its
+  error at \(t{=}1024\) goes 0.339&nbsp;&rarr;&nbsp;0.055; add a single scale+offset and it's
+  <b>0.0111 vs my method's 0.0112, identical correlation. Advantage&nbsp;=&nbsp;1.00&times;.</b>
+  The whole gap was a leak I'd hard-coded into the baseline myself — see §5.
+  <span class="mut">Weirdly, this ended up being the most valuable result of the summer: a fully
+  reproducible autopsy of how you fool yourself with structure-preserving methods.</span>
 </div>
 
 <div class="tl-item find">
@@ -599,17 +602,17 @@ three-digit match was seed luck;
 (6) "Mamba/IndexMem corner" mislabeled the baseline — their decay is <i>learned</i> with no floor.
 </div>
 
-<div class="ok"><b>Why this failure is worth keeping:</b> it is a precise, reproducible case study
-in how structure-preservation results flatter themselves — hard-constrain the property your metric
-measures, exempt your method from a leak the baseline is forced to carry, and extrapolation plots
-will look magnificent. The audit protocol (one-variable controls, oracle recalibration, no-input
-floors, Bayes-floor comparison) transfers to any structured-memory evaluation, including published
-ones.</div>
+<div class="ok"><b>Why I kept the wreckage on display:</b> this is exactly how
+structure-preserving results flatter themselves — hard-constrain the thing your metric measures,
+quietly exempt your method from a leak the baseline carries, and your extrapolation plots look
+incredible. The checklist that caught me (one-variable controls, oracle recalibration, no-input
+floors, information floors) applies to published structured-memory papers too, most of which
+report none of these controls. Someone should run it on them.</div>
 </div>
 
 <!-- ============================================================ SURVIVES -->
 <div class="card" id="sec-survives">
-<h2>6 &middot; What survives, honestly</h2>
+<h2>6 &middot; What actually survives</h2>
 <ul>
 <li><b>The construction works as specified.</b> Exact subspace conservation under forcing, machine
 precision, verified. An <i>auditable</i> memory — the balance law \(C^\top z_t = C^\top z_s + \sum
@@ -732,12 +735,12 @@ them below Adam's \(\epsilon = 10^{-8}\) denominator floor, so update sizes coll
 (&sim;10<sup>-2</sup> total drift in s over 3000 steps — softplus value unchanged). Under Adam
 it is the \(\epsilon\) floor, not the small gradient per se, that makes init0 a de-facto
 freeze; with a different optimizer or \(\epsilon\), init0 might not freeze. <b>Now measured</b> (<span class="mono">results/freeze_probe.txt</span>): median |dL/d(raw)| = 2.1&times;10<sup>-9</sup>, sqrt(v-hat) = 2.7&times;10<sup>-9</sup> &lt; Adam &epsilon; = 10<sup>-8</sup>, median step 5&times;10<sup>-5</sup> (60&times; below sign-following), extrapolated &sim;260k steps to reach the attractor vs the 3,000-step budget. Optimizer-dependence caveat stands: under SGD or a smaller &epsilon; this freeze may not hold.</span></dd>
-<dt>Significance</dt><dd>It reframes what structure is <i>for</i>: not expressivity (the baselines
-could express the solution) but <b>reliability of optimization under train-short/test-long</b> —
-which is the universal regime of LLM memory (trained on 4–16k, deployed on 100k+). Concrete
-falsifiable prediction: learned-&lambda; latent memories (e.g. IndexMem's
-\(M\!\leftarrow\!\lambda M + \eta\sum\!\text{Lin}(k)\otimes v^\top\)) under-retain beyond their
-training length, and pinning a supervised subspace fixes it without retraining tricks.</dd>
+<dt>Significance</dt><dd>This changed what I think structure is <i>for</i>. It's not that the
+baselines can't represent the solution — they can — it's that optimization won't find or keep it
+when training is short and deployment is long. Which is the situation of basically every LLM
+memory in existence (trained on 4–16k tokens, deployed on 100k+). The falsifiable prediction:
+learned-decay memories like IndexMem's under-retain past their training length, and pinning a
+supervised subspace fixes it with one projection, no retraining tricks.</dd>
 <dt>Caveats</dt><dd><b>Update (l0_forget):</b> the missing tension has now been built and
 validated — on a task where forgetting is provably necessary (Phase A PASS, 92.4%), pinned
 uniquely holds both axes while the frozen-zero fix loses the ledger on 1/3 seeds
@@ -885,8 +888,8 @@ init-sensitivity footnote. This must be tried <i>before</i> claiming novelty.</l
 
 <div class="card" style="border-left:3px solid var(--gold)">
 <h2>Most promising, ranked</h2>
-<p>Ranked by evidence quality &times; generality &times; testability — not by how much we like
-them. Ranking as of the completed n=10 statistics.</p>
+<p>Ranked by evidence quality, generality, and testability — not by how attached I am to
+them (finding #2 would rank higher on that metric). As of the completed n=10 statistics.</p>
 </div>
 
 <div class="fcard primary" id="p1">
@@ -988,9 +991,9 @@ forgetting-necessary benchmark before it can be claimed.</li>
 
 <div class="card" style="border-left:3px solid var(--blue)">
 <h2>Roadmap &mdash; from one replicated toy finding to a defensible research program</h2>
-<p>Organized in tiers by <b>compute required</b> and gated by <b>go/no-go decisions</b>, so the
-laptop keeps producing verdicts while the cluster items queue. Guiding rule learned the hard way
-in §5: <i>every tier includes its own falsification attempt before its claims are trusted.</i></p>
+<p>Organized by <b>how much compute each tier needs</b>, with go/no-go gates, so my laptop
+keeps producing verdicts while the cluster wishlist waits. One rule I now follow after §5:
+<i>every tier has to include its own attempt to kill its result before I get to believe it.</i></p>
 <table>
 <tr><th>tier</th><th>where</th><th>wall-clock</th><th>what it decides</th></tr>
 <tr><td>T0 &middot; verdicts in flight</td><td>laptop, running</td><td>hours</td>
@@ -1161,7 +1164,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 </div><!-- /page-roadmap -->
 
 <footer>
-  <span>Latent Twin Memory &middot; independent research project &middot; Aug 2026</span>
+  <span>latent-memory &middot; Michael Kaiser &middot; independent research, summer 2026</span>
   <span><span id="verif-footer">64/64</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
   full provenance in git history &middot; single RTX 3060 (6 GB)</span>
 </footer>

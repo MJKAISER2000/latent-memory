@@ -1,0 +1,13 @@
+[env] train_memory torch=2.5.1+cu121 cuda=12.1 gpu=NVIDIA GeForce RTX 3060 Laptop GPU commit=d1dc980 dirty=True
+train (300, 60, 896)  evalshort (60, 60, 896)  testlong (60, 989, 896)  d_model=896
+K_train=60  K_test=989  ratio=16.5x
+label scale: train M_final mean 4.24 (sd 1.64); testlong M_final mean 62.97
+
+  s0   scalar: eval@60=-0.279  te@64=-0.193  te@256=-7.973  te@512=-7.133  te@989=-6.578  decay=1.59e-03  (103s)
+  s0  scalar0: eval@60=-0.217  te@64=-0.574  te@256=-6.136  te@512=-6.764  te@989=-6.496  decay=2.25e-09  (96s)
+  s0    diag0: eval@60=-0.236  te@64=-0.352  te@256=-5.984  te@512=-6.456  te@989=-6.585  decay=2.11e-09  (92s)
+  s0       ks: eval@60=-0.227  te@64=-0.203  te@256=-3.888  te@512=-5.575  te@989=-6.017  decay=1.09e-03  (101s)
+  s0   pinned: eval@60=-0.214  te@64=-0.262  te@256=-0.013  te@512=-0.126  te@989=+0.087  decay=1.01e-03  (107s)
+  s1   scalar: eval@60=-0.203  te@64=-0.271  te@256=-5.939  te@512=-6.262  te@989=-6.486  decay=1.39e-03  (89s)
+  s1  scalar0: eval@60=-0.244  te@64=-0.363  te@256=-7.131  te@512=-6.927  te@989=-7.134  decay=2.17e-09  (83s)
+  s1    diag0: eval@60=-0.357  te@64=-0.378  te@256=-7.672  te@512=-7.578  te@989=-7.041  decay=2.08e-09  (98s)
