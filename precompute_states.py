@@ -52,12 +52,16 @@ def encode_blocks(
     block: int,
     chunk: int,
     context_mode: str,
+    store_tokens: bool = False,
 ):
     """Mean-pool hidden states within each block of `block` tokens.
 
-    Returns (n_blocks, d_model) float32 on CPU.
+    Returns (pooled, tokens): pooled (n_blocks, d_model) float32 CPU; tokens
+    (n_blocks, block, d_model) float16 CPU when store_tokens else None. Only
+    complete blocks are kept in `tokens` (the trailing partial block is
+    dropped there but retained in `pooled`, matching prior behavior).
     """
-    out = []
+    out, toks = [], []
     past = None
     for start in range(0, len(ids), chunk):
         piece = torch.tensor(ids[start:start + chunk], device=device)[None]
@@ -72,9 +76,13 @@ def encode_blocks(
         # Pool into blocks. Blocks are aligned to absolute token position so
         # that a block never straddles a chunk boundary inconsistently.
         for b0 in range(0, h.shape[0], block):
-            out.append(h[b0:b0 + block].mean(dim=0))
+            seg = h[b0:b0 + block]
+            out.append(seg.mean(dim=0))
+            if store_tokens and seg.shape[0] == block:
+                toks.append(seg.half().cpu())
         del res
-    return torch.stack(out).cpu()
+    T = torch.stack(toks) if (store_tokens and toks) else None
+    return torch.stack(out).cpu(), T
 
 
 def main():
@@ -90,6 +98,10 @@ def main():
     ap.add_argument("--context-mode", default="local", choices=["local", "full"])
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--fp32", action="store_true", help="use fp32 (slower, more VRAM)")
+    ap.add_argument("--store-tokens", action="store_true",
+                    help="additionally store per-token hidden states (fp16, "
+                         "(n_blocks, block, d)) as record field 'T' -- enables "
+                         "learned pooling downstream; ~50x larger cache")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -113,8 +125,9 @@ def main():
     for i, r in enumerate(rows):
         s = Sample(**r)
         t = tokenize_sample(s, tok, block=args.block)
-        X = encode_blocks(t["input_ids"], model, device, args.layer,
-                          args.block, args.chunk, args.context_mode)
+        X, T = encode_blocks(t["input_ids"], model, device, args.layer,
+                             args.block, args.chunk, args.context_mode,
+                             store_tokens=args.store_tokens)
         mask = torch.tensor(t["durable_block_mask"][: X.shape[0]], dtype=torch.bool)
         if mask.shape[0] < X.shape[0]:                 # pad if rounding differed
             mask = torch.cat([mask, torch.zeros(X.shape[0] - mask.shape[0],
@@ -128,6 +141,8 @@ def main():
             "task": s.task,
             "n_tokens": t["n_tokens"],
         }
+        if T is not None:
+            rec["T"] = T                               # (n_blocks, block, d) fp16
         # Additive (L1 ledger experiment): for `count` samples, store each
         # deposit's block index and its amount, parsed from the durable span
         # text ("A shipment of N units..."). Enables per-block running-total
