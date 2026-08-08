@@ -11,7 +11,7 @@ training length, at every training horizon we tested.
 research log (with interactive data sliders and an animated traditional-context vs
 latent-memory comparison), findings with per-claim provenance links, a ranked
 "most promising" page, and the roadmap. Every quantitative claim is recomputed from raw
-logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (64/64).
+logs — see [`results/VERIFICATION.md`](results/VERIFICATION.md) (67/67).
 
 Headline (toy-scale, honestly scoped; n=10, pre-registered superiority tests all
 p = 0.002): the short-horizon training objective has an

@@ -182,7 +182,7 @@ RTX&nbsp;3060 laptop (6&nbsp;GB)</div>
   horizon &mdash; median over 10 seeds, minimum +0.999 (learned baselines: &minus;6)</span></div>
   <div class="stat"><b class="gold">89,222&times;</b><span>train-vs-test loss sensitivity gap in
   the sub-critical decay region &mdash; the measured mechanism</span></div>
-  <div class="stat"><b id="verif-hero">64/64</b><span>quantitative claims recomputed from raw logs by an
+  <div class="stat"><b id="verif-hero">67/67</b><span>quantitative claims recomputed from raw logs by an
   independent parser (<span class="mono">VERIFICATION.md</span>)</span></div>
   <div class="stat"><b class="red">3</b><span>of our own hypotheses refuted by our own probes
   &mdash; each replaced by a measured mechanism</span></div>
@@ -351,6 +351,28 @@ This animates the verified <i>mechanism</i> — see §4 for what it does and doe
   Content differences are not significant (pinned 8/10 vs freezes, p&ge;0.11; ks trades
   ledger for content). Selective protection now has statistically supported evidence on a
   forgetting-validated task.
+  <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
+  <b>L1 &mdash; first contact with a real language model</b>
+  <span class="pill p-fail">PRE-REGISTERED: NO-TRANSFER</span>
+  <span class="pill p-part">EXPLORATORY: SIGNATURE PRESENT</span><br>
+  Same five arms, but the inputs are frozen Qwen2.5-0.5B block states over real text — count
+  streams where deposits ("A shipment of 27 units...") hide among same-template distractors.
+  Train on ~60-block streams, test on 989-block streams (~63k tokens, 16.5&times;). My
+  pre-registered kill criterion fired: <b>every arm fails at the training horizon</b>
+  (skill &minus;0.14 to &minus;0.29) — reading the deposit out of a mean-pooled 64-token block
+  is the bottleneck, so retention differences are unmeasurable where I set the bar.
+  Two exploratory observations (not pre-registered, labeled accordingly): at 16.5&times;,
+  <b>pinned is the only arm with positive skill, 3/3 seeds</b> (+0.07&ndash;0.09 vs
+  &minus;5.5 to &minus;7.3 for everything else — the frozen-decay fixes fail here through
+  <i>rotation</i>, which freezing decay does not stop and the projection does); and learned
+  decay converged to 1.1&ndash;1.6&times;10<sup>-3</sup> on real representations — the same
+  attractor scale as the toy, showing up in the wild. Fix before rerun: attention-pool the
+  blocks so one deposit sentence is not diluted 64:1.
+  <div class="prov"><span class="prov-label">Provenance</span>
+  <a class="xref file" href="results/L1_count.txt" target="_blank">L1_count.txt</a>
+  <a class="xref file" href="train_memory.py" target="_blank">train_memory.py (pre-registration in header)</a>
+  <a class="xref file" href="l1_data.py" target="_blank">l1_data.py</a>
+  </div></div>
 </div>
 
 </div>
@@ -967,7 +989,7 @@ these controls. Everything else on this page is believable <i>because</i> of thi
 <div class="prov"><span class="prov-label">Provenance</span>
 <a class="xref" onclick="return goto('page-findings','f2')">Finding F2</a>
 <a class="xref" onclick="return goto('page-log','sec-failures')">§5 failure ledger</a>
-<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (64/64)</a>
+<a class="xref file" href="results/VERIFICATION.md" target="_blank">VERIFICATION.md (67/67)</a>
 </div>
 </div>
 
@@ -1165,7 +1187,7 @@ that this is a live risk; T1-2/T1-5 pace matters.<br>
 
 <footer>
   <span>latent-memory &middot; Michael Kaiser &middot; independent research, summer 2026</span>
-  <span><span id="verif-footer">64/64</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
+  <span><span id="verif-footer">67/67</span> claims verified (<span class="mono">results/VERIFICATION.md</span>) &middot;
   full provenance in git history &middot; single RTX 3060 (6 GB)</span>
 </footer>
 

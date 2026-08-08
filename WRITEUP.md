@@ -1,7 +1,7 @@
 # latent-memory: the idea, what I found, and what's wrong with it
 
 One page, honest version. Every number here gets recomputed from the raw logs by a
-script (`results/VERIFICATION.md`, 64/64 checks passing), because I burned myself
+script (`results/VERIFICATION.md`, 67/67 checks passing), because I burned myself
 early on trusting numbers I'd typed by hand. Everything ran on my laptop's RTX 3060.
 
 ## The idea
@@ -154,6 +154,8 @@ which has caught me three separate times.
 
 Repo: github.com/mjkaiser2000/latent-memory — the dashboard (`dashboard.html`) has
 the full research log including the retraction, interactive plots of the actual
-data, and provenance links from every claim to the log file that backs it. Next
-milestone: the real-LM run currently in progress, then (if that survives) swapping
-this into an actual eviction-style LLM memory and testing at deployment lengths.
+data, and provenance links from every claim to the log file that backs it. The
+first real-LM run is in (results/L1_count.txt; see the drawbacks section for the
+honest verdict). Next: fix the block encoder (attention pooling instead of mean
+pooling), rerun, and if the retention signature holds at usable absolute accuracy,
+swap this into an eviction-style LLM memory and test at deployment lengths.

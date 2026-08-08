@@ -11,3 +11,22 @@ label scale: train M_final mean 4.24 (sd 1.64); testlong M_final mean 62.97
   s1   scalar: eval@60=-0.203  te@64=-0.271  te@256=-5.939  te@512=-6.262  te@989=-6.486  decay=1.39e-03  (89s)
   s1  scalar0: eval@60=-0.244  te@64=-0.363  te@256=-7.131  te@512=-6.927  te@989=-7.134  decay=2.17e-09  (83s)
   s1    diag0: eval@60=-0.357  te@64=-0.378  te@256=-7.672  te@512=-7.578  te@989=-7.041  decay=2.08e-09  (98s)
+  s1       ks: eval@60=-0.168  te@64=-0.213  te@256=-3.869  te@512=-5.549  te@989=-6.022  decay=1.09e-03  (101s)
+  s1   pinned: eval@60=-0.296  te@64=-0.429  te@256=+0.040  te@512=-0.041  te@989=+0.072  decay=9.83e-04  (104s)
+  s2   scalar: eval@60=-0.261  te@64=-0.571  te@256=-0.865  te@512=-4.159  te@989=-6.717  decay=1.42e-03  (99s)
+  s2  scalar0: eval@60=-0.136  te@64=-0.325  te@256=-1.853  te@512=-8.987  te@989=-5.491  decay=2.19e-09  (99s)
+  s2    diag0: eval@60=-0.291  te@64=-0.259  te@256=-2.868  te@512=-8.819  te@989=-7.329  decay=2.10e-09  (98s)
+  s2       ks: eval@60=-0.220  te@64=-0.375  te@256=-2.807  te@512=-4.830  te@989=-5.552  decay=1.12e-03  (100s)
+  s2   pinned: eval@60=-0.243  te@64=-0.402  te@256=-0.099  te@512=-0.185  te@989=+0.081  decay=9.93e-04  (104s)
+
+     arm | eval@train-horizon med |  test@16x med | learned decay med
+------------------------------------------------------------------------
+  scalar |                 -0.261 |        -6.578 |          1.42e-03
+ scalar0 |                 -0.217 |        -6.496 |          2.19e-09
+   diag0 |                 -0.291 |        -7.041 |          2.10e-09
+      ks |                 -0.220 |        -6.017 |          1.09e-03
+  pinned |                 -0.243 |        +0.081 |          9.93e-04
+------------------------------------------------------------------------
+
+PRE-REGISTERED READING
+  NO-TRANSFER (flux bottleneck): every arm fails even at the training horizon -- real-state flux estimation dominates; retention differences unmeasurable in this setup.

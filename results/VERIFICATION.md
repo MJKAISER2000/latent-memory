@@ -62,6 +62,9 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | rescue: lambda=30 rescues 3/3 (med +0.95) | rescue_stats.txt | med +0.950, 3/3 | 3/3, ~0.95 | OK |
 | rescue: 3x budget rescues 2/5 (unreliable) | rescue_stats.txt | 2/5 | 2/5 | OK |
 | scaling: d*.K spread 5.6x (> pre-stated 4x -> 1/K refuted) | scaling_dstar.txt | 5.60x | 5.60x | OK |
+| L1 pre-registered verdict printed (NO-TRANSFER flux bottleneck) | L1_count.txt | present | present | OK |
+| L1 exploratory: pinned test@16x median +0.081 | L1_count.txt | +0.081 | +0.081 | OK |
+| L1: learned scalar decay converged to 1.1-1.6e-3 (attractor scale) | L1_count.txt | 1.59e-03,1.39e-03,1.42e-03 | [1.0e-3,1.7e-3] | OK |
 | RDATA.LTR matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.00e+00 | <=2% | OK |
 | RDATA.LTE matches landscape log (22 pts) | dashboard vs L0_mechanism.txt | max|d|=0.05 | <=1.0 abs | OK |
 | RDATA.HOR.dissipative matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
@@ -69,4 +72,4 @@ Every quantitative claim in the package, recomputed from raw logs by `verify_num
 | RDATA.HOR.pinned matches seeds summary | dashboard vs results_L0_seeds.txt | max|d|=0.0000 | <=0.003 | OK |
 | RDATA.STATS pinned skills match log rows | dashboard vs L0_stats.txt | 10 values | identical multiset | OK |
 
-**64/64 claims verified; 0 mismatches.**
+**67/67 claims verified; 0 mismatches.**

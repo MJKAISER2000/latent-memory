@@ -1,5 +1,5 @@
 window.LIVE = {
- "generated": "2026-08-07 01:17:02",
+ "generated": "2026-08-08 00:14:19",
  "runs": [
   {
    "name": "L0 frontier (3 seeds)",
@@ -48,6 +48,11 @@ window.LIVE = {
   },
   {
    "name": "d* scaling sweep",
+   "state": "done",
+   "note": ""
+  },
+  {
+   "name": "L1 real-LM count (rung 1)",
    "state": "done",
    "note": ""
   },
@@ -156,8 +161,8 @@ window.LIVE = {
   ]
  },
  "verif": {
-  "ok": "64",
-  "total": "64",
+  "ok": "67",
+  "total": "67",
   "mismatches": "0"
  }
 };

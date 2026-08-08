@@ -270,6 +270,26 @@ def main():
                     "5.60x", "OK" if (m and abs(float(m.group(1)) - 5.6) < 0.1)
                     else "**MISMATCH**"))
 
+    # --- L1 real-LM run (results/L1_count.txt) ---
+    l1p = R / "L1_count.txt"
+    if l1p.exists():
+        l1 = l1p.read_text(encoding="utf-8", errors="replace")
+        OUT.append(("L1 pre-registered verdict printed (NO-TRANSFER flux bottleneck)",
+                    "L1_count.txt",
+                    "present" if "NO-TRANSFER (flux bottleneck)" in l1 else "absent",
+                    "present",
+                    "OK" if "NO-TRANSFER (flux bottleneck)" in l1 else "**MISMATCH**"))
+        m = re.search(r"pinned \|\s+[+-][\d.]+ \|\s+([+-][\d.]+) \|", l1)
+        OUT.append(("L1 exploratory: pinned test@16x median +0.081",
+                    "L1_count.txt", m.group(1) if m else "not found", "+0.081",
+                    "OK" if (m and abs(float(m.group(1)) - 0.081) < 0.005)
+                    else "**MISMATCH**"))
+        rows = re.findall(r"s\d\s+scalar: .*?decay=([\d.]+e-\d+)", l1)
+        ok = rows and all(1.0e-3 <= float(x) <= 1.7e-3 for x in rows)
+        OUT.append(("L1: learned scalar decay converged to 1.1-1.6e-3 (attractor scale)",
+                    "L1_count.txt", ",".join(rows) if rows else "not found",
+                    "[1.0e-3,1.7e-3]", "OK" if ok else "**MISMATCH**"))
+
     # --- dashboard RDATA arrays vs logs (figures/sliders render from these) ---
     dash = Path("dashboard.html").read_text(encoding="utf-8", errors="replace")
 

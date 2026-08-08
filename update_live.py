@@ -79,6 +79,7 @@ def run_table():
     add("L0-Forget n=10 (5 arms)", "L0_forget_n10.txt", "PAIRED TESTS")
     add("Rescue statistics", "rescue_stats.txt", "VERDICT INPUTS")
     add("d* scaling sweep", "scaling_dstar.txt", "READING")
+    add("L1 real-LM count (rung 1)", "L1_count.txt", "PRE-REGISTERED READING")
     add("Verification pass", "VERIFICATION.md", "claims verified")
     st = parse_stats()
     runs.append({"name": "n=10 statistics (6 arms)",
